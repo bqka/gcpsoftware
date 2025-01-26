@@ -1,7 +1,27 @@
 // @ts-nocheck
-import React from 'react';
+import React from "react";
 
-const CameraControl = ({ isCameraOn, enableVideoStream, disableVideoStream, selectedCamera, setSelectedCamera, cameras, handleScreenshot }) => {
+type Camera = string[];
+
+interface CameraControlProps {
+  isCameraOn: boolean;
+  enableVideoStream: () => void;
+  disableVideoStream: () => void;
+  selectedCamera: string;
+  setSelectedCamera: (deviceId: string) => void;
+  cameras: Camera[];
+  handleScreenshot: () => void;
+}
+
+const CameraControl: React.FC<CameraControlProps> = ({
+  isCameraOn,
+  enableVideoStream,
+  disableVideoStream,
+  selectedCamera,
+  setSelectedCamera,
+  cameras,
+  handleScreenshot,
+}) => {
   return (
     <div className="flex flex-row items-center gap-4 justify-items-start w-full">
       <button

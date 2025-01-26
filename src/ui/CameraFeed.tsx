@@ -1,19 +1,20 @@
 "use client";
 
-// @ts-nocheck
-
 import { useRef, useState, useEffect } from "react";
 import CameraControl from "./CameraControl";
 import ScreenshotList from "./ScreenshotList";
 import axios from "axios";
 
+type Camera = MediaDeviceInfo;
+type MediaStreamState = MediaStream | null;
+
 export default function CameraFeed() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [mediaStream, setMediaStream] = useState(null);
-  const [isCameraOn, setIsCameraOn] = useState(false);
-  const [cameras, setCameras] = useState([]);
-  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [mediaStream, setMediaStream] = useState<MediaStreamState>(null);
+  const [isCameraOn, setIsCameraOn] = useState<boolean>(false);
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
   const [capturedImages, setCapturedImages] = useState<string[]>([]);
 
   useEffect(() => {
@@ -23,24 +24,31 @@ export default function CameraFeed() {
         const videoDevices = devices.filter(
           (device) => device.kind === "videoinput"
         );
-        // @ts-ignore
         setCameras(videoDevices);
         if (videoDevices.length > 0) {
-          // @ts-ignore
           setSelectedCamera(videoDevices[0].deviceId);
         }
       } catch (err) {
         console.error("Error fetching cameras", err);
       }
     };
-
     getCameras();
+
+    return () => {
+      disableVideoStream();
+    };
   }, []);
 
   const enableVideoStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      // @ts-ignore
+      if (!selectedCamera) {
+        console.error("No camera selected");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: selectedCamera },
+      });
       setMediaStream(stream);
       setIsCameraOn(true);
     } catch (error) {
@@ -50,7 +58,6 @@ export default function CameraFeed() {
 
   const disableVideoStream = () => {
     if (mediaStream) {
-      // @ts-ignore
       mediaStream.getTracks().forEach((track) => {
         track.stop();
       });
@@ -61,7 +68,6 @@ export default function CameraFeed() {
 
   useEffect(() => {
     if (videoRef.current && mediaStream) {
-      // @ts-ignore
       videoRef.current.srcObject = mediaStream;
     }
   }, [videoRef, mediaStream]);
@@ -96,8 +102,7 @@ export default function CameraFeed() {
     setCapturedImages([]);
   };
 
-  // @ts-ignore
-  const deleteScreenshot = (index) => {
+  const deleteScreenshot = (index: number) => {
     setCapturedImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
