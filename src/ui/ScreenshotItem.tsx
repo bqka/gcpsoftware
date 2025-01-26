@@ -1,12 +1,24 @@
-// @ts-nocheck
-import React from 'react';
-import close from './assets/close.svg';
+import React from "react";
+import close from "./assets/close.svg";
 
+interface ScreenshotItemProps {
+  image: string;
+  index: number;
+  deleteScreenshot: (index: number) => void;
+}
 
-const ScreenshotItem = ({ image, index, deleteScreenshot }) => {
+const ScreenshotItem: React.FC<ScreenshotItemProps> = ({
+  image,
+  index,
+  deleteScreenshot,
+}) => {
   return (
     <div key={index} className="group aspect-[1.60] h-[120px] relative">
-      <img src={image} alt={`Screenshot ${index + 1}`} className="w-full h-full object-cover rounded-lg" />
+      <img
+        src={image}
+        alt={`Screenshot ${index + 1}`}
+        className="w-full h-full object-cover rounded-lg"
+      />
       <a onClick={() => deleteScreenshot(index)}>
         <img
           src={close}

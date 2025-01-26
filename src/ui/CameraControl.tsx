@@ -1,15 +1,14 @@
-// @ts-nocheck
 import React from "react";
 
-type Camera = string[];
+type Camera = MediaDeviceInfo[];
 
 interface CameraControlProps {
   isCameraOn: boolean;
   enableVideoStream: () => void;
   disableVideoStream: () => void;
-  selectedCamera: string;
+  selectedCamera: string | null;
   setSelectedCamera: (deviceId: string) => void;
-  cameras: Camera[];
+  cameras: Camera;
   handleScreenshot: () => void;
 }
 

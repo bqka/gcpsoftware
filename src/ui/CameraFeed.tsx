@@ -122,7 +122,6 @@ export default function CameraFeed() {
 
       console.log("Backend response:", response.data);
     } catch (error: any) {
-      // @ts-ignore
       if (error.response) {
         console.log(
           "Error from backend:",
