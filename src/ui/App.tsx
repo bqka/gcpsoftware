@@ -1,34 +1,15 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { Button } from '@/components/ui/button'
+import "@/ui/styles/App.css"
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    window.electron.subscribeStatistics((stats) => console.log(stats));
-  }, [])
-
   return (
-    <>
-      <div>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className='h-full w-full'>
+      <div className='flex flex-col w-48 gap-4'>
+        <Button>Calibrate Camera</Button>
+        <Button>New Item</Button>
+        <Button>Test Item</Button>
       </div>
-      <h1>LESGOO</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 

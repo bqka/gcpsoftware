@@ -1,5 +1,5 @@
 import React from "react";
-import trash from "./assets/trash.svg";
+import trash from "@/ui/assets/trash.svg";
 import ScreenshotItem from "./ScreenshotItem";
 
 interface ScreenshotListProps {
@@ -15,13 +15,13 @@ const ScreenshotList: React.FC<ScreenshotListProps> = ({
 }) => {
   return (
     <div className="w-[260px] h-[460px] flex flex-col items-center">
-      <div className="flex flex-row w-full">
+      <div className="flex flex-row w-full items-center">
         <h2 className="text-lg font-bold flex-1">Captured Screenshots</h2>
         <a onClick={clearScreenshots} className="hover:cursor-pointer">
           <img
             src={trash}
             alt="Delete all Screenshots"
-            className="h-[24px] w-auto"
+            className="h-[22px] w-auto"
           />
         </a>
       </div>

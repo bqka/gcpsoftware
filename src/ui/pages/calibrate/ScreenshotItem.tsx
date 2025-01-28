@@ -1,5 +1,5 @@
 import React from "react";
-import close from "./assets/close.svg";
+import close from "@/ui/assets/close.svg";
 
 interface ScreenshotItemProps {
   image: string;

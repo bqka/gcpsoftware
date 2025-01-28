@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "@/components/ui/button";
 
 type Camera = MediaDeviceInfo[];
 
@@ -9,7 +10,6 @@ interface CameraControlProps {
   selectedCamera: string | null;
   setSelectedCamera: (deviceId: string) => void;
   cameras: Camera;
-  handleScreenshot: () => void;
 }
 
 const CameraControl: React.FC<CameraControlProps> = ({
@@ -19,26 +19,16 @@ const CameraControl: React.FC<CameraControlProps> = ({
   selectedCamera,
   setSelectedCamera,
   cameras,
-  handleScreenshot,
 }) => {
   return (
-    <div className="flex flex-row items-center gap-4 justify-items-start w-full">
-      <button
-        className="px-4 bg-secondary-50 text-text-950 font-semibold rounded-lg shadow-md py-2"
-        onClick={isCameraOn ? disableVideoStream : enableVideoStream}
-      >
+    <div className="flex flex-row items-center gap-4 justify-items-start w-full mt-2">
+      <Button onClick={isCameraOn ? disableVideoStream : enableVideoStream}>
         {isCameraOn ? "Turn Camera Off" : "Turn Camera On"}
-      </button>
-      <button
-        className="bg-accent-500 text-text-950 p-2 font-semibold rounded-lg shadow-md hover:bg-accent-400"
-        onClick={handleScreenshot}
-      >
-        Take Screenshot
-      </button>
+      </Button>
       <div className="max-w-[180px]">
         <div className="relative">
           <select
-            className="px-2 bg-primary-50 py-2 rounded-lg w-full"
+            className="px-2 bg-primary-50 py-2 rounded-lg w-full text-white"
             onChange={(e) => setSelectedCamera(e.target.value)}
             value={selectedCamera || ""}
           >
