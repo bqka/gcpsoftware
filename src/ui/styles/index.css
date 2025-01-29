@@ -135,3 +135,7 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+.group:hover .delete-icon {
+  opacity: 1; /* Show the trash icon */
+}

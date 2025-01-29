@@ -3,6 +3,7 @@ import CameraFeed from "../../../components/ui/CameraFeed";
 import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { Input } from "@/components/ui/input";
 
 interface FetchedItem {
   id: number;
@@ -66,22 +67,29 @@ export default function NewItem() {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="flex flex-row h-[80%] w-full px-8 py-4 bg-red-300">
+      <div className="flex flex-row h-[80%] w-full px-8 py-4">
         <div className="flex flex-col gap-2">
           <CameraFeed videoRef={videoRef} />
-          <input
+          {/* <input
             type="text"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             placeholder="Enter item name"
             className="p-2 border border-gray-300 rounded mb-2 text-white"
+          /> */}
+          <Input
+            type="text"
+            value={itemName}
+            onChange={(e) => setItemName(e.target.value)}
+            placeholder="Enter item name"
+            className="max-w-72 min-h-8"
           />
           <canvas ref={canvasRef} className="hidden"></canvas>
           <Button onClick={handleScreenshot} className="max-w-36">
             Take Image
           </Button>
         </div>
-        <div className="bg-blue-300 h-full w-[50%] mx-4">
+        <div className="h-full w-[50%] mx-4">
           <DataTable columns={columns} data={items} />
         </div>
       </div>

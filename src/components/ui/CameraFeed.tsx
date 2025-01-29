@@ -79,7 +79,7 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
   return (
     <div className="w-[820px]">
       <div
-        className={`relative w-full aspect-video bg-background-100 rounded-xl overflow-hidden bg-blue-400`}
+        className={`relative w-full aspect-video bg-background-100 rounded-xl overflow-hidden`}
       >
         {mediaStream != null ? (
           <video

@@ -8,7 +8,7 @@ import fs from "fs";
 
 const db = new Database(path.join(app.getAppPath(), "./database.db"));
 
-async function addBaseItem(item: Item, base64Image: string) {
+async function addBaseItem(itemName: string, base64Image: string) {
   const imageDir = path.join(app.getAppPath(), "images/baseImages");
   if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir);
@@ -21,12 +21,16 @@ async function addBaseItem(item: Item, base64Image: string) {
 
   fs.writeFileSync(imagePath, Buffer.from(base64Data, "base64"));
 
-  const date = new Date().toISOString();
+  const date = new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(Date.now());
+
   await db.run(
     `
     INSERT INTO baseitems (name, imagePath, date)
     VALUES (?, ?, ?)`,
-    [item.name, imagePath, date]
+    [itemName, imagePath, date]
   );
 }
 
@@ -51,7 +55,9 @@ app.on("ready", () => {
 
   ipcMain.handle("getItems", async () => {
     try {
-      const rows = await db.query("SELECT id, date, name, imagePath FROM baseitems");
+      const rows = await db.query(
+        "SELECT id, date, name, imagePath FROM baseitems"
+      );
 
       const formattedItems = rows.map((row: any) => ({
         id: row.id,
@@ -67,15 +73,16 @@ app.on("ready", () => {
     }
   });
 
-  ipcMain.handle("addItem", async (event, item: Item) => {
+  ipcMain.handle("addItem", async (event, item: {name: string, image: string}) => {
     try {
       const { name, image } = item;
-      await addBaseItem(item, image);
+      await addBaseItem(name, image);
       console.log(`Inserted new item: ${name}`);
     } catch (error) {
       console.error("Error inserting item:", error);
     }
   });
+
 });
 
 app.on("window-all-closed", () => {

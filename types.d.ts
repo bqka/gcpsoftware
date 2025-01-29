@@ -16,9 +16,11 @@ type EventPayloadMapping = {
   getItems: Array<{ id: number; date: string; name: string; image: string }>;
 };
 
-type Item = {
+type BaseItem = {
+  id: number;
   name: string;
-  image: string;
+  date: string;
+  imagePath: string;
 };
 
 interface Window {
@@ -28,7 +30,7 @@ interface Window {
   };
   electronAPI: {
     getItems: () => Promise<
-      Array<{ id: number; date: string; name: string; imagePath: string }>
+      Array<BaseItem>
     >;
     addItem: (item: Item) => Promise<void>;
   };
