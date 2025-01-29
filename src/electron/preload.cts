@@ -8,6 +8,12 @@ contextBridge.exposeInMainWorld("electron", {
 } satisfies Window["electron"])
 
 
+contextBridge.exposeInMainWorld('electronAPI', {
+  getItems: () => ipcRenderer.invoke('getItems'),
+  addItem: (item: Item) => ipcRenderer.invoke('addItem', item),
+});
+
+
 function ipcOn<Key extends keyof EventPayloadMapping>(
   key: Key,
   callback: (payload: EventPayloadMapping[Key]) => void

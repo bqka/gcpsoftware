@@ -7,6 +7,6 @@ import Calibrate from './pages/calibrate/Calibrate'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Calibrate />
+    <NewItem />
   </StrictMode>,
 )
