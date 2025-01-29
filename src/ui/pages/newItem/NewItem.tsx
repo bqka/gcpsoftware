@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import CameraFeed from "../../../components/ui/CameraFeed";
 import { Button } from "@/components/ui/button";
-import { Item, columns } from "./columns";
+import { columns } from "./columns";
 import { DataTable } from "./data-table";
 
 interface FetchedItem {
   id: number;
   date: string;
   name: string;
-  image: string;
+  imagePath: string;
 }
 
 export default function NewItem() {

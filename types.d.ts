@@ -28,7 +28,7 @@ interface Window {
   };
   electronAPI: {
     getItems: () => Promise<
-      Array<{ id: number; date: string; name: string; image: string }>
+      Array<{ id: number; date: string; name: string; imagePath: string }>
     >;
     addItem: (item: Item) => Promise<void>;
   };
