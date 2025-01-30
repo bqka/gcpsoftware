@@ -83,6 +83,14 @@ app.on("ready", () => {
     }
   });
 
+  ipcMain.handle("deleteItem", async (event, key: number) => {
+    try {
+      await db.remove(key);
+    } catch(error) {
+      console.error("Error removing item: ", error);
+    }
+  })
+
 });
 
 app.on("window-all-closed", () => {

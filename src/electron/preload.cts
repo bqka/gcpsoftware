@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld("electron", {
 contextBridge.exposeInMainWorld('electronAPI', {
   getItems: () => ipcRenderer.invoke('getItems'),
   addItem: (item: { name: string, image: string }) => ipcRenderer.invoke('addItem', item),
+  deleteItem: (key: number) => ipcRenderer.invoke('deleteItem', key)
 });
 
 

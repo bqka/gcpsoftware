@@ -33,5 +33,6 @@ interface Window {
       Array<BaseItem>
     >;
     addItem: (item: { name: string, image: string }) => Promise<void>;
+    deleteItem: (key: number) => Promise<void>;
   };
 }
