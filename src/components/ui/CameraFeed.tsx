@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CameraControl from "./CameraControl";
+import { CameraOff } from "lucide-react";
 
 type Camera = MediaDeviceInfo;
 type MediaStreamState = MediaStream | null;
@@ -88,7 +89,8 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
             className="object-cover aspect-video w-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -scale-x-100"
           />
         ) : (
-          <div className="h-full w-full bg-gray-700 flex justify-center items-center text-white font-semibold">
+          <div className="h-full w-full flex bg-muted justify-center items-center text-white font-semibold">
+            <CameraOff className="size-8 mr-4" />
             <div>Camera is Off</div>
           </div>
         )}

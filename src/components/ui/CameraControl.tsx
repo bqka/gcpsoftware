@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Power } from "lucide-react";
 
 type Camera = MediaDeviceInfo[];
 
@@ -33,20 +34,21 @@ const CameraControl: React.FC<CameraControlProps> = ({
   
   return (
     <div className="flex flex-row items-center gap-4 justify-items-start w-full mt-2">
-      <Button onClick={isCameraOn ? disableVideoStream : enableVideoStream}>
+      <Button onClick={isCameraOn ? disableVideoStream : enableVideoStream} variant={isCameraOn ? "destructive" : "default"}>
+        <Power className="size-4" />
         {isCameraOn ? "Turn Camera Off" : "Turn Camera On"}
       </Button>
       <div className="max-w-[180px]">
         <div className="relative">
-          <div className="max-w-180">
+          <div className="w-[200px]">
             <Select
               value={selectedCameraLabel || ""}
               onValueChange={(value) => setSelectedCamera(value)}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger>
                 <SelectValue placeholder="Select Camera" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[200px] max-w-full">
                 {cameras.map((camera, index) => (
                   <SelectItem key={camera.deviceId} value={camera.label}>
                     {camera.label || `Camera ${index + 1}`}

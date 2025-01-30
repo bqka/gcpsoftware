@@ -1,16 +1,12 @@
-import { Button } from '@/components/ui/button'
-import "@/ui/styles/App.css"
+import "@/ui/styles/App.css";
+import AppRoutes from "./routes/routes";
 
 function App() {
   return (
-    <div className='h-full w-full'>
-      <div className='flex flex-col w-48 gap-4'>
-        <Button>Calibrate Camera</Button>
-        <Button>New Item</Button>
-        <Button>Test Item</Button>
-      </div>
+    <div>
+      <AppRoutes />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

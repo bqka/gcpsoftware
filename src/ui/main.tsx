@@ -1,13 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './styles/index.css'
-import NewItem from './pages/newItem/NewItem'
-import Calibrate from './pages/calibrate/Calibrate'
-import TestItem from './pages/testItem/TestItem'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles/index.css";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/routes";
 
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <TestItem />
-  </StrictMode>,
-)
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </StrictMode>
+);
