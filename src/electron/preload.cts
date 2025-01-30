@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld("electron", {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   getItems: () => ipcRenderer.invoke('getItems'),
-  addItem: (item: Item) => ipcRenderer.invoke('addItem', item),
+  addItem: (item: { name: string, image: string }) => ipcRenderer.invoke('addItem', item),
 });
 
 
