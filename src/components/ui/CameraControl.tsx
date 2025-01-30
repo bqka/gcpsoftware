@@ -46,7 +46,7 @@ const CameraControl: React.FC<CameraControlProps> = ({
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select Camera" />
               </SelectTrigger>
-              <SelectContent className="max-w-full">
+              <SelectContent>
                 {cameras.map((camera, index) => (
                   <SelectItem key={camera.deviceId} value={camera.label}>
                     {camera.label || `Camera ${index + 1}`}

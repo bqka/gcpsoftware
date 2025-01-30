@@ -8,6 +8,6 @@ import TestItem from './pages/testItem/TestItem'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <NewItem />
+    <TestItem />
   </StrictMode>,
 )

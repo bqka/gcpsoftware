@@ -33,6 +33,16 @@ export default function NewItem() {
     }
   };
 
+      const removeItem = async (key: number) => {
+    try {
+      const result = await window.electronAPI.deleteItem(key);
+      fetchItems();
+      console.log(result);
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
   useEffect(() => {
     fetchItems();
   }, []);
@@ -87,7 +97,7 @@ export default function NewItem() {
           </Button>
         </div>
         <div className="h-full w-[50%] mx-4">
-          <DataTable columns={columns} data={items} />
+          <DataTable columns={columns(removeItem)} data={items} />
         </div>
       </div>
     </div>

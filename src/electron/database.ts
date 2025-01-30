@@ -1,4 +1,5 @@
 import sqlite3 from 'sqlite3';
+import fs from 'fs';
 
 class Database {
   private db: sqlite3.Database;
@@ -36,6 +37,34 @@ class Database {
       });
     });
   }
+
+  async remove(id: number, imagePathField: string = "imagePath"): Promise<void> {
+    try {
+      const result = await this.query<{ [key: string]: string }>(
+        `SELECT ${imagePathField} FROM baseitems WHERE id = ?`,
+        [id]
+      );
+
+      if (result.length > 0) {
+        const imagePath = result[0][imagePathField];
+
+        if (imagePath && fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+          console.log("File deleted:", imagePath);
+        } else {
+          console.warn("File does not exist or no image path provided:", imagePath);
+        }
+      } else {
+        console.warn("No record found with the provided ID:", id);
+      }
+
+      await this.run(`DELETE FROM baseitems WHERE id = ?`, [id]);
+      console.log("Record deleted successfully:", id);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  }
+
 
   close(): void {
     try {
