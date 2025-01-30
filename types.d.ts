@@ -32,6 +32,6 @@ interface Window {
     getItems: () => Promise<
       Array<BaseItem>
     >;
-    addItem: (item: Item) => Promise<void>;
+    addItem: (item: { name: string, image: string }) => Promise<void>;
   };
 }
