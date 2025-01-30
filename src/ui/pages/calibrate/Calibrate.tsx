@@ -74,18 +74,17 @@ export default function Calibrate() {
   };
 
   return (
-    <div className="flex flex-col p-6 space-y-6 w-screen mx-auto h-full">
-      <div className="flex justify-start">
+    <div className="flex flex-col p-6 space-y-6 w-screen mx-auto items-center">
+      <div className="flex justify-start w-full">
         <BackButton />
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-4p-6 rounded-xl shadow-md w-full">
-        {/* Camera Feed */}
+      <div className="flex flex-col items-center justify-center gap-4 p-6 rounded-xl shadow-md w-[1200px]">
         <div className="flex justify-center w-full">
           <CameraFeed videoRef={videoRef} />
         </div>
 
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-4 justify-end">
           <Button onClick={handleScreenshot} className="px-6 py-3 text-sm">
             Take Image
           </Button>
@@ -95,7 +94,7 @@ export default function Calibrate() {
         </div>
       </div>
 
-      <div className="max-h-[300px] mt-4">
+      <div className="w-[1200px]">
         <ScreenshotList
           capturedImages={capturedImages}
           clearScreenshots={clearScreenshots}

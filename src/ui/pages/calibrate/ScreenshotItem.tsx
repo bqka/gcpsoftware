@@ -13,7 +13,7 @@ const ScreenshotItem: React.FC<ScreenshotItemProps> = ({
   deleteScreenshot,
 }) => {
   return (
-    <div key={index} className="group aspect-[1.60] h-[120px] relative">
+    <div key={index} className="group aspect-[1.60] h-36 relative">
       <img
         src={image}
         alt={`Screenshot ${index + 1}`}

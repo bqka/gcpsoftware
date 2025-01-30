@@ -5,12 +5,10 @@
 }
 
 html, body {
-  height: 100%;            /* Ensure full height for the document */
-  margin: 0;               /* Remove default margin applied by the browser */
-  padding: 0;              /* Remove default padding */
+  height: 100%;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
-   /*-webkit-font-smoothing: antialiased; /* Improve font rendering for WebKit browsers */
-  -moz-osx-font-smoothing: grayscale; /* Improve font rendering for Firefox on macOS */
 }
 
 /* Ensure the body itself does not have any extra height limitations */
