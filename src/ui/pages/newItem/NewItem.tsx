@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { Input } from "@/components/ui/input";
-import { ipcRenderer } from "electron";
+import BackButton from "@/components/ui/BackButton";
 
 interface FetchedItem {
   id: number;
@@ -78,7 +78,8 @@ export default function NewItem() {
 
   return (
     <div className="h-screen w-screen flex items-center justify-center">
-      <div className="flex flex-row h-[80%] w-full px-8 py-4">
+      <div className="flex flex-row h-[80%] w-full px-8 py-4 gap-4">
+        <BackButton />
         <div className="flex flex-col gap-2">
           <CameraFeed videoRef={videoRef} />
           <Input

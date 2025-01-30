@@ -1,5 +1,5 @@
 import React from "react";
-import trash from "@/ui/assets/trash.svg";
+import { Trash } from "lucide-react";
 import ScreenshotItem from "./ScreenshotItem";
 
 interface ScreenshotListProps {
@@ -14,26 +14,27 @@ const ScreenshotList: React.FC<ScreenshotListProps> = ({
   deleteScreenshot,
 }) => {
   return (
-    <div className="w-[260px] h-[460px] flex flex-col items-center">
-      <div className="flex flex-row w-full items-center">
-        <h2 className="text-lg font-bold flex-1">Captured Screenshots</h2>
+    <div className="w-full max-w-[400px] h-[500px] flex flex-col items-center bg-background p-4 rounded-lg shadow-lg overflow-hidden">
+      <div className="flex flex-row w-full items-center justify-between">
+        <h2 className="text-md font-semibold">Captured Screenshots</h2>
         <a onClick={clearScreenshots} className="hover:cursor-pointer">
-          <img
-            src={trash}
-            alt="Delete all Screenshots"
-            className="h-[22px] w-auto"
-          />
+          <Trash color="red" size={20} />
         </a>
       </div>
-      <div className="flex flex-col gap-4 mt-4">
-        {capturedImages.map((image, index) => (
-          <ScreenshotItem
-            key={index}
-            index={index}
-            image={image}
-            deleteScreenshot={deleteScreenshot}
-          />
-        ))}
+      <div className="flex flex-col gap-4 mt-4 overflow-y-auto max-h-[380px]">
+        {/* Render captured images */}
+        {capturedImages.length === 0 ? (
+          <p className="text-center text-gray-500">No screenshots captured</p>
+        ) : (
+          capturedImages.map((image, index) => (
+            <ScreenshotItem
+              key={index}
+              index={index}
+              image={image}
+              deleteScreenshot={deleteScreenshot}
+            />
+          ))
+        )}
       </div>
     </div>
   );

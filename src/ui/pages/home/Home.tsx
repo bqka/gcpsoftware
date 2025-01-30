@@ -4,20 +4,20 @@ import { Link } from 'react-router-dom'
 
 function Home() {
   return (
-    <div className='h-full w-full'>
-      <div className='flex flex-col w-48 gap-4'>
-        <Link to="/calibrate">
-          <Button>Calibrate Camera</Button>
+    <div className="h-screen w-screen flex justify-center items-center"> {/* Flexbox to center */}
+    <div className="flex flex-col items-center gap-4 p-8 rounded-lg shadow-md">
+    <Link to="/calibrate">
+        <Button className='w-36 text-wrap'>Calibrate Camera</Button>
         </Link>
         <Link to="/new-item">
-          <Button>New Item</Button>
+          <Button className='w-36 text-wrap'>New Item</Button>
         </Link>
         <Link to="/test-item">
-          <Button>Test Item</Button>
+          <Button className='w-36 text-wrap'>Test Item</Button>
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

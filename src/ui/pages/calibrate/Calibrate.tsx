@@ -5,6 +5,7 @@ import ScreenshotList from "./ScreenshotList";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import CameraFeed from "../../../components/ui/CameraFeed";
+import BackButton from "@/components/ui/BackButton";
 
 export default function Calibrate() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -73,20 +74,34 @@ export default function Calibrate() {
   };
 
   return (
-    <div className="flex flex-row">
-      <div className="flex flex-col items-center justify-center rounded-2xl p-4">
-        <div className="flex flex-col gap-2">
+    <div className="flex flex-col p-6 space-y-6 w-screen mx-auto h-full">
+      <div className="flex justify-start">
+        <BackButton />
+      </div>
+
+      <div className="flex flex-col items-center justify-center gap-4p-6 rounded-xl shadow-md w-full">
+        {/* Camera Feed */}
+        <div className="flex justify-center w-full">
           <CameraFeed videoRef={videoRef} />
-          <Button onClick={handleScreenshot} className="max-w-36">Take Image</Button>
-          <Button onClick={handleUpload} className="max-w-28">Continue</Button>
+        </div>
+
+        <div className="flex gap-4 mt-4">
+          <Button onClick={handleScreenshot} className="px-6 py-3 text-sm">
+            Take Image
+          </Button>
+          <Button onClick={handleUpload} className="px-6 py-3 text-sm">
+            Continue
+          </Button>
         </div>
       </div>
 
-      <ScreenshotList
-        capturedImages={capturedImages}
-        clearScreenshots={clearScreenshots}
-        deleteScreenshot={deleteScreenshot}
-      />
+      <div className="max-h-[300px] mt-4">
+        <ScreenshotList
+          capturedImages={capturedImages}
+          clearScreenshots={clearScreenshots}
+          deleteScreenshot={deleteScreenshot}
+        />
+      </div>
 
       <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>

@@ -43,13 +43,6 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
   };
 
   useEffect(() => {
-    if(isCameraOn && selectedCamera){
-      disableVideoStream();
-      enableVideoStream();
-    }
-  }, [selectedCamera])
-
-  useEffect(() => {
     const getCameras = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -72,13 +65,24 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
   }, []);
 
   useEffect(() => {
+    if (isCameraOn && selectedCamera) {
+      disableVideoStream();
+      enableVideoStream();
+    }
+  }, [selectedCamera]);
+
+  useEffect(() => {
+    return () => disableVideoStream();
+  }, [mediaStream]);
+
+  useEffect(() => {
     if (videoRef.current && mediaStream) {
       videoRef.current.srcObject = mediaStream;
     }
   }, [videoRef, mediaStream]);
 
   return (
-    <div className="w-[820px]">
+    <div className="w-[820px] flex flex-col gap-2">
       <div
         className={`relative w-full aspect-video bg-background-100 rounded-xl overflow-hidden`}
       >
