@@ -34,7 +34,7 @@ export default function NewItem() {
     }
   };
 
-      const removeItem = async (key: number) => {
+  const removeItem = async (key: number) => {
     try {
       const result = await window.electronAPI.deleteItem(key);
       fetchItems();
@@ -76,31 +76,31 @@ export default function NewItem() {
   // };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center">
-      <div className="flex flex-row h-[80%] w-full px-8 py-4 gap-2">
-        <BackButton />
-        <div className="flex flex-col gap-2">
-          <CameraFeed videoRef={videoRef} />
-          <div>
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select Item" />
-              </SelectTrigger>
-              <SelectContent>
-                {items.map((item) => (
-                  <SelectItem key={item.id} value={item.name}>{item.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <canvas ref={canvasRef} className="hidden"></canvas>
-          <Button className="max-w-36">
-            Take Image
-          </Button>
+    <div className="flex flex-col w-screen p-6 gap-4 items-center">
+      <div className="flex justify-start w-full">
+      <BackButton />
+      </div>
+      <div className="flex flex-col w-[875px] gap-2">
+        <CameraFeed videoRef={videoRef} />
+        <div>
+          <Select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select Item" />
+            </SelectTrigger>
+            <SelectContent>
+              {items.map((item) => (
+                <SelectItem key={item.id} value={item.name}>
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="h-full w-[50%] mx-4">
-          <DataTable columns={columns(removeItem)} data={items} />
-        </div>
+        <canvas ref={canvasRef} className="hidden"></canvas>
+        <Button className="max-w-36">Take Image</Button>
+      </div>
+      <div className="h-full w-[50%] mx-4">
+        <DataTable columns={columns(removeItem)} data={items} />
       </div>
     </div>
   );

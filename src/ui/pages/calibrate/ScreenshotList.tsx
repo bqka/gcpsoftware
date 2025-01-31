@@ -21,9 +21,9 @@ const ScreenshotList: React.FC<ScreenshotListProps> = ({
           <Trash color="red" size={18} />
         </a>
       </div>
-      <div className="flex flex-row gap-4 max-w-full overflow-x-auto flex-grow items-center">
+      <div className="flex flex-row gap-4 w-full overflow-x-auto flex-grow items-center justify-center">
         {capturedImages.length === 0 ? (
-          <p className="text-center text-gray-500">No screenshots captured</p>
+          <p className="text-center justify-center text-gray-500">No screenshots captured</p>
         ) : (
           capturedImages.map((image, index) => (
             <ScreenshotItem
