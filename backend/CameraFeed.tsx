@@ -28,7 +28,7 @@ const CameraControl: React.FC<CameraControlProps> = ({
   setSelectedCamera,
   cameras,
 }) => {
-  const [selectedCameraLabel, setSelectedCameraLabel] = useState<string>("");
+  const [selectedCameraLabel, setSelectedCameraLabel] = useState<string | "">("");
 
   useEffect(() => {
     const cameraLabel = cameras.find(

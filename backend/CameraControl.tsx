@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -28,14 +28,9 @@ const CameraControl: React.FC<CameraControlProps> = ({
   setSelectedCamera,
   cameras,
 }) => {
-  const [selectedCameraLabel, setSelectedCameraLabel] = useState<string>("");
-
-  useEffect(() => {
-    const cameraLabel = cameras.find(
-      (camera) => camera.deviceId === selectedCamera
-    )?.label || "";
-    setSelectedCameraLabel(cameraLabel);
-  }, [selectedCamera, cameras]);
+  const selectedCameraLabel = cameras.find(
+    (camera) => camera.deviceId === selectedCamera
+  )?.label;
   
   return (
     <div className="flex flex-row items-center gap-4 justify-items-start w-full mt-2">
@@ -47,15 +42,15 @@ const CameraControl: React.FC<CameraControlProps> = ({
         <div className="relative">
           <div className="w-[200px]">
             <Select
-              value={selectedCamera || ""}
+              value={selectedCameraLabel || ""}
               onValueChange={(value) => setSelectedCamera(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Camera">{selectedCameraLabel}</SelectValue>
+                <SelectValue placeholder="Select Camera" />
               </SelectTrigger>
               <SelectContent className="w-[200px] max-w-full">
                 {cameras.map((camera, index) => (
-                  <SelectItem key={camera.deviceId} value={camera.deviceId}>
+                  <SelectItem key={camera.deviceId} value={camera.label}>
                     {camera.label || `Camera ${index + 1}`}
                   </SelectItem>
                 ))}
