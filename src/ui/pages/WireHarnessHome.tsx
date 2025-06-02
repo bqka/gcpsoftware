@@ -19,7 +19,8 @@ export default function WireHarnessHome() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [data, setData] = useState<SingleWire[]>([]);
-  const [selectedWire, setSelectedWire] = useState<string>("singlewire");
+  const [selectedWireType, setSelectedWireType] =
+    useState<string>("singlewire");
   const [sequence, setSequence] = useState<string>("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
@@ -35,17 +36,33 @@ export default function WireHarnessHome() {
 
   const removeItem = async (id: number) => {
     try {
-      await window.electron.removeItem(selectedWire, id);
-      fetchWireData(selectedWire);
+      await window.electron.removeItem(selectedWireType, id);
+      fetchWireData(selectedWireType);
     } catch (error) {
       console.error("Error removing items:", error);
     }
   };
 
-  const handleScreenshot = async () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
+  const fetchWireImage = async () => {
+    try{
+      if(!selectedId){
+        console.error("No wire selected.");
+        return null;
+      }
+      console.log(selectedWireType);
+      const result = await window.electron.fetchWireImage(selectedId, selectedWireType);
+      return result;
+    } catch(error){
+      console.error("Error:", error);
+      return null;
+    }
+  };
+
+  const getCurrentCanvasFrame = async () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (video && canvas) {
       const context = canvas.getContext("2d");
 
       canvas.width = video.videoWidth;
@@ -54,27 +71,61 @@ export default function WireHarnessHome() {
       if (context) {
         context.translate(canvas.width, 0);
         context.scale(-1, 1);
-
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const screenshot = canvas.toDataURL("image/png");
-
-        // const newItem = {
-        //   tableName: selectedWire,
-        //   sequence: "TestSequence",
-        //   image: screenshot,
-        // };
-
-        try {
-          await window.electron.addItem(selectedWire, sequence, screenshot);
-          fetchWireData(selectedWire);
-          setSequence("");
-        } catch (error) {
-          console.error("Error adding item:", error);
-        }
-      } else {
-        console.error("Video or canvas reference is missing");
+        return canvas.toDataURL("image/png");
       }
+    }
+
+    return null;
+  };
+
+  const compareItem = async () => {
+    try {
+      if (!selectedId) {
+        throw new Error("No wire selected");
+      }
+
+      const originalImage = await fetchWireImage();
+      const imageToBeChecked = await getCurrentCanvasFrame();
+
+      if(!originalImage){
+        console.error("Error fetching original image.");
+        return null;
+      }
+
+      if(!imageToBeChecked){
+        console.error("Error fetching image to be checked.");
+        return null;
+      }
+      const imageToBeCheckedRaw = imageToBeChecked.replace(/^data:image\/\w+;base64,/, '');
+
+      const result = await window.electron.compareItem(originalImage, imageToBeCheckedRaw, selectedWireType)
+      console.log(result)
+      return result;
+    } catch (error) {
+      console.error("Error: ", error);
+      return null;
+    }
+  };
+
+  const handleScreenshot = async () => {
+    // const newItem = {
+    //   tableName: selectedWireType,
+    //   sequence: "TestSequence",
+    //   image: screenshot,
+    // };
+    const screenshot = await getCurrentCanvasFrame();
+    if (!screenshot) {
+      console.error("Screenshot not available");
+      return;
+    }
+
+    try {
+      await window.electron.addItem(selectedWireType, sequence, screenshot);
+      fetchWireData(selectedWireType);
+      setSequence("");
+    } catch (error) {
+      console.error("Error adding item:", error);
     }
   };
 
@@ -83,13 +134,13 @@ export default function WireHarnessHome() {
   }, []);
 
   useEffect(() => {
-    fetchWireData(selectedWire);
+    fetchWireData(selectedWireType);
     setSelectedId(null);
-  }, [selectedWire]);
+  }, [selectedWireType]);
 
   useEffect(() => {
     console.log(selectedId);
-  }, [selectedId])
+  }, [selectedId]);
 
   return (
     <div className="w-screen min-h-screen flex justify-center flex-row px-4 gap-4 pt-12">
@@ -99,8 +150,8 @@ export default function WireHarnessHome() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row gap-2 w-[60%]">
             <Select
-              value={selectedWire || ""}
-              onValueChange={(value) => setSelectedWire(value)}
+              value={selectedWireType || ""}
+              onValueChange={(value) => setSelectedWireType(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Wire" />
@@ -122,13 +173,17 @@ export default function WireHarnessHome() {
           <Button onClick={handleScreenshot} className="max-w-36">
             Add Item
           </Button>
-          <Button className="max-w-36">
+          <Button className="max-w-36" onClick={compareItem}>
             Compare
           </Button>
         </div>
       </div>
       <div className="w-[50%]">
-        <DataTable columns={columns(removeItem, {selectedId, setSelectedId})} data={data} selectionActions={{ selectedId, setSelectedId }} />
+        <DataTable
+          columns={columns(removeItem, { selectedId, setSelectedId })}
+          data={data}
+          selectionActions={{ selectedId, setSelectedId }}
+        />
       </div>
     </div>
   );
