@@ -4,23 +4,17 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Trash } from "lucide-react";
 
 interface SelectionProps {
-  selectedId: number | null;
-  setSelectedId: (id: number | null) => void;
+  selectedResultId: number | null;
+  setSelectedResultId: (id: number | null) => void;
 }
-
-export type SingleWire = {
-  id: number;
-  sequence: string;
-  date: string;
-};
 
 type RemoveItemCallback = (id: number) => void;
 
 export const columns = (
   removeItem: RemoveItemCallback,
-  selectionActions: SelectionProps // 🟢 Pass selection as a single prop
-): ColumnDef<SingleWire>[] => {
-  const { selectedId, setSelectedId } = selectionActions; // 🟢 Destructure selection state & setter
+  selectionActions: SelectionProps
+): ColumnDef<ResultRow>[] => {
+  const { selectedResultId, setSelectedResultId } = selectionActions;
 
   return [
     {
@@ -32,24 +26,32 @@ export const columns = (
           <input
             type="radio"
             name="selectedRow"
-            checked={selectedId === item.id}
-            onChange={() => setSelectedId(item.id)}
+            checked={selectedResultId === item.id}
+            onChange={() => setSelectedResultId(item.id)}
             className="cursor-pointer"
-            onClick={(e) => e.stopPropagation()} // 🟢 Prevent row click from triggering deselection
+            onClick={(e) => e.stopPropagation()}
           />
         );
       },
     },
     {
       accessorKey: "id",
-      header: "Id",
+      header: "Result Id",
     },
     {
-      accessorKey: "sequence",
-      header: "Sequence",
+      accessorKey: "wire_id",
+      header: "Wire Id",
     },
     {
-      accessorKey: "date",
+      accessorKey: "result",
+      header: "Result",
+    },
+    {
+      accessorKey: "tested_by",
+      header: "Tested By",
+    },
+    {
+      accessorKey: "compared_at",
       header: "Date",
     },
     {
@@ -61,7 +63,7 @@ export const columns = (
             <a
               className="hover:cursor-pointer"
               onClick={(e) => {
-                e.stopPropagation(); // 🟢 Prevent row selection when clicking delete
+                e.stopPropagation();
                 removeItem(item.id);
               }}
             >

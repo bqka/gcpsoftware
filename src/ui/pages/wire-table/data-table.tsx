@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/table";
 
 interface SelectionProps {
-  selectedId: number | null;
-  setSelectedId: (id: number | null) => void;
+  selectedWireId: number | null;
+  setSelectedWireId: (id: number | null) => void;
 }
 
 interface DataTableProps<TData, TValue> {
@@ -38,7 +38,7 @@ export function DataTable<TData extends { id: number }, TValue>({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  const { selectedId, setSelectedId} = selectionActions
+  const { selectedWireId, setSelectedWireId} = selectionActions
 
   return (
     <div className="rounded-md border">
@@ -66,11 +66,11 @@ export function DataTable<TData extends { id: number }, TValue>({
                 key={row.id}
                 className="cursor-pointer"
                 data-state={
-                  selectedId === row.original.id ? "selected" : undefined
+                  selectedWireId === row.original.id ? "selected" : undefined
                 }
                 onClick={() =>
-                  setSelectedId(
-                    selectedId === row.original.id ? null : row.original.id
+                  setSelectedWireId(
+                    selectedWireId === row.original.id ? null : row.original.id
                   )
                 }
               >

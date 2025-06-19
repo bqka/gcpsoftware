@@ -64,6 +64,13 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
     };
   }, []);
 
+  // Enable Camera on Load
+  useEffect(() => {
+    if(selectedCamera){
+      enableVideoStream();
+    }
+  }, [selectedCamera])
+
   useEffect(() => {
     if (isCameraOn && selectedCamera) {
       disableVideoStream();

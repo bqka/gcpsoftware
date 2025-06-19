@@ -9,29 +9,56 @@ import { spawn } from "child_process";
 async function addItem(
   tableName: string,
   validSequence: string,
-  base64Image: string
+  base64Images: string[]
 ) {
   const imageDir = path.join(app.getAppPath(), "images", tableName);
   if (!fs.existsSync(imageDir)) {
-    fs.mkdirSync(imageDir);
+    fs.mkdirSync(imageDir, { recursive: true });
   }
-  const fileName = `${Date.now()}.png`;
-  const imagePath = path.join(imageDir, fileName);
-
-  // Remove base64 metadata (data:image/png;base64,)
-  const base64Data = base64Image.replace(/^data:image\/png;base64,/, "");
-
-  fs.writeFileSync(imagePath, Buffer.from(base64Data, "base64"));
 
   const date = new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(Date.now());
 
-  await db(tableName).insert({
-    sequence: validSequence,
-    path: imagePath,
+  // Validate number of images
+  if (tableName === "singlewire" && base64Images.length !== 1) {
+    throw new Error("Single wire must have exactly one image.");
+  }
+
+  if (tableName === "doublewire" && base64Images.length !== 2) {
+    throw new Error("Double wire must have exactly two images.");
+  }
+
+  // Generate image file names
+  const imagePaths = base64Images.map((img, idx) => {
+    const filename = `${Date.now()}_${idx}.png`;
+    const filepath = path.join(imageDir, filename);
+    const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
+    fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
+    return filepath;
   });
+
+  let result;
+  // Insert based on wire type
+  if (tableName === "singlewire") {
+    result = await db("singlewire").insert({
+      sequence: validSequence,
+      path: imagePaths[0],
+      created_at: new Date(), // optional
+    });
+  } else if (tableName === "doublewire") {
+    result = await db("doublewire").insert({
+      sequence: validSequence,
+      image_front: imagePaths[0],
+      image_back: imagePaths[1],
+      created_at: new Date(), // optional
+    });
+  } else {
+    throw new Error("Unknown wire type.");
+  }
+
+  console.log(result);
 }
 
 app.on("ready", () => {
@@ -52,13 +79,6 @@ ipcMain.handle(
   async (_event, tableName: string): Promise<SingleWire[]> => {
     try {
       const rows = await db(tableName).select("*");
-      // const formattedData: SingleWire[] = rows.map((row: any) => ({
-      //   id: row.id,
-      //   sequence: row.sequence,
-      //   date: row.date,
-      // }));
-
-      // console.log(rows)
       return rows;
     } catch (error) {
       console.error("Database Error:", error);
@@ -67,22 +87,65 @@ ipcMain.handle(
   }
 );
 
-ipcMain.handle("fetch-wire-image", async(_event, {selectedWireId , wireType}): Promise<string | null> => {
-  try{
-    const result = await db(wireType).where({ id: selectedWireId }).select("path").first();
+ipcMain.handle(
+  "fetch-wire-image",
+  async (_event, { selectedWireId, wireType }): Promise<string[]> => {
+    try {
+      if (wireType === "singlewire") {
+        const result = await db(wireType)
+          .where({ id: selectedWireId })
+          .select("path")
+          .first();
 
-     if (!result?.path || !fs.existsSync(result.path)) {
-      console.warn("Image path not found or file does not exist.");
-      return null;
+        if (!result?.path || !fs.existsSync(result.path)) {
+          console.warn(
+            "Single wire image path not found or file does not exist."
+          );
+          return [];
+        }
+
+        const imageBuffer = fs.readFileSync(result.path);
+        const base64Image = `data:image/png;base64,${imageBuffer.toString(
+          "base64"
+        )}`;
+        return [base64Image];
+      }
+
+      if (wireType === "doublewire") {
+        const result = await db(wireType)
+          .where({ id: selectedWireId })
+          .select("image_front", "image_back")
+          .first();
+
+        const images: string[] = [];
+
+        if (result?.image_front && fs.existsSync(result.image_front)) {
+          const frontBuffer = fs.readFileSync(result.image_front);
+          images.push(
+            `data:image/png;base64,${frontBuffer.toString("base64")}`
+          );
+        } else {
+          console.warn("Front image missing or does not exist.");
+        }
+
+        if (result?.image_back && fs.existsSync(result.image_back)) {
+          const backBuffer = fs.readFileSync(result.image_back);
+          images.push(`data:image/png;base64,${backBuffer.toString("base64")}`);
+        } else {
+          console.warn("Back image missing or does not exist.");
+        }
+
+        return images;
+      }
+
+      console.warn("Unknown wire type:", wireType);
+      return [];
+    } catch (error) {
+      console.error("Error fetching wire images:", error);
+      return [];
     }
-    const imageBuffer = fs.readFileSync(result.path);
-    const base64Image = `data:image/png;base64,${imageBuffer.toString("base64")}`;
-    return base64Image;
-  } catch(error){
-    console.error("Error:", error);
-    return null;
   }
-})
+);
 
 ipcMain.handle(
   "add-item",
@@ -110,10 +173,55 @@ ipcMain.handle("remove-item", async (_, { table, id }) => {
   }
 });
 
-ipcMain.handle("compare-item", async (_event, {originalImage, imageToBeChecked, wireType}) => {
+ipcMain.handle(
+  "compare-item",
+  async (_event, { originalImage, imageToBeChecked, wireType }) => {
+    return new Promise((resolve, reject) => {
+      const pythonPath =
+        "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+      const python = spawn(pythonPath, ["backend/compare.py"]);
+
+      let output = "";
+      let error = "";
+
+      // Collect stdout
+      python.stdout.on("data", (data) => {
+        output += data.toString();
+      });
+
+      // Collect stderr
+      python.stderr.on("data", (data) => {
+        error += data.toString();
+      });
+
+      // On finish
+      python.on("close", (code) => {
+        if (code === 0) {
+          const result = JSON.parse(output);
+          resolve(result); // Return Python result
+        } else {
+          reject(new Error(`Python error: ${error}`));
+        }
+      });
+
+      // Send data to Python via stdin
+      const payload = JSON.stringify({
+        original: originalImage,
+        input: imageToBeChecked,
+        wireType: wireType,
+      });
+
+      python.stdin.write(payload);
+      python.stdin.end();
+    });
+  }
+);
+
+ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
   return new Promise((resolve, reject) => {
-    const pythonPath = "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-    const python = spawn(pythonPath, ["backend/compare.py"]);
+    const pythonPath =
+      "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+    const python = spawn(pythonPath, ["backend/getsequence.py"]);
 
     let output = "";
     let error = "";
@@ -131,7 +239,8 @@ ipcMain.handle("compare-item", async (_event, {originalImage, imageToBeChecked, 
     // On finish
     python.on("close", (code) => {
       if (code === 0) {
-        resolve(output.trim()); // Return Python result
+        const result = JSON.parse(output);
+        resolve(result); // Return Python result
       } else {
         reject(new Error(`Python error: ${error}`));
       }
@@ -139,12 +248,114 @@ ipcMain.handle("compare-item", async (_event, {originalImage, imageToBeChecked, 
 
     // Send data to Python via stdin
     const payload = JSON.stringify({
-      original: originalImage,
-      input: imageToBeChecked,
-      wireType: wireType
+      input: wireImages,
+      wireType: wireType,
     });
 
     python.stdin.write(payload);
     python.stdin.end();
   });
 });
+
+ipcMain.handle(
+  "add-result",
+  async (
+    _event,
+    { wireType, wireId, result, details, tested_by, base64images }
+  ) => {
+    try {
+      const imageDir = path.join(
+        app.getAppPath(),
+        "images",
+        "results",
+        wireType
+      );
+      if (!fs.existsSync(imageDir)) {
+        fs.mkdirSync(imageDir, { recursive: true });
+      }
+
+      const imagePaths = base64images.map((img: string, idx: number) => {
+        const filename = `${Date.now()}_${idx}.png`;
+        const filepath = path.join(imageDir, filename);
+        const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
+        fs.writeFileSync(filepath, Buffer.from(base64Data, "base64"));
+        return filepath;
+      });
+
+      const queryResult = await db("results").insert({
+        wire_type: wireType,
+        wire_id: wireId,
+        result,
+        details,
+        tested_by,
+        image_front: imagePaths[0],
+        image_back: imagePaths[1],
+      });
+      console.log(queryResult);
+    } catch (error) {
+      console.error("Error adding result:", error);
+      throw new Error("Failed to add result");
+    }
+  }
+);
+
+ipcMain.handle(
+  "fetch-results",
+  async (_event, wireType: string): Promise<ResultRow[]> => {
+    try {
+      const rows = await db("results")
+        .where({
+          wire_type: wireType,
+        })
+        .select("*");
+      return rows;
+    } catch (error) {
+      console.error("Database Error:", error);
+      return [];
+    }
+  }
+);
+
+ipcMain.handle("fetch-result-details", async (_event, id): Promise<string> => {
+  try {
+    const row = await db("results").where({ id }).select("details").first();
+    return row?.details || "";
+  } catch (error) {
+    console.error("Error fetching result details:", error);
+    return "";
+  }
+});
+
+ipcMain.handle(
+  "fetch-result-wire-image",
+  async (_event, resultId): Promise<string[]> => {
+    try {
+      console.log("ID: ", resultId)
+      const result = await db("results")
+        .where({ id: resultId })
+        .select("image_front", "image_back")
+        .first();
+
+      const images: string[] = [];
+
+      if (result?.image_front && fs.existsSync(result.image_front)) {
+        const frontBuffer = fs.readFileSync(result.image_front);
+        images.push(`data:image/png;base64,${frontBuffer.toString("base64")}`);
+      } else {
+        console.warn("Front image missing or does not exist.");
+      }
+
+      if (result?.image_back && fs.existsSync(result.image_back)) {
+        const backBuffer = fs.readFileSync(result.image_back);
+        images.push(`data:image/png;base64,${backBuffer.toString("base64")}`);
+      } else {
+        console.warn("Back image missing or does not exist.");
+      }
+
+      return images;
+    } catch (error) {
+      console.error("Error fetching wire images:", error);
+      return [];
+    }
+  }
+);

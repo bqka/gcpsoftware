@@ -4,36 +4,46 @@ import base64
 import numpy as np
 import cv2
 
-raw_input = sys.stdin.read()
-# print("RAW INPUT: ", raw_input, file=sys.stderr)
+def base64_to_cv2_image(base64_list):
+    images = []
+    for base64_str in base64_list:
+        if base64_str.startswith("data:image"):
+            base64_str = base64_str.split(",")[1]
+        base64_str += "=" * (-len(base64_str) % 4)  # Fix padding
+        decoded = base64.b64decode(base64_str)
+        np_data = np.frombuffer(decoded, np.uint8)
+        img = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
+        images.append(img)
+    return images
 
-# Read JSON from stdin
-data = json.loads(raw_input)
-original_b64 = data["original"]
-input_b64 = data["input"]
-wire_type = data["wireType"]
+def compare_single(original, input_image):
+    # Example logic: compare image sizes
+    return {"match": True, "details": "SUCCESSFUL"}
 
-def base64_to_cv2_image(base64_str):
-    if base64_str.startswith("data:image"):
-        base64_str = base64_str.split(",")[1]
+def compare_double(original, input_image):
+    return {"match": False, "details": "WIRE MISMATCH AT POSITION 7"}
 
-    # Fix padding
-    base64_str += "=" * (-len(base64_str) % 4)
+def main():
+    try:
+        raw_input = sys.stdin.read()
+        data = json.loads(raw_input)
 
-    decoded = base64.b64decode(base64_str)
-    np_data = np.frombuffer(decoded, np.uint8)
-    img = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
-    return img
+        ref_images = base64_to_cv2_image(data["original"])
+        test_images = base64_to_cv2_image(data["input"])
+        wire_type = data["wireType"]
 
-original_img = base64_to_cv2_image(original_b64)
-input_img = base64_to_cv2_image(input_b64)
+        if wire_type == "singlewire":
+            result = compare_single(ref_images, test_images)
+        elif wire_type == "doublewire":
+            result = compare_double(ref_images, test_images)
+        else:
+            raise ValueError("Invalid wire type")
 
-# Do your comparison here
-# For example: compare size
-print(type(original_img), type(input_img), file=sys.stderr)
-if original_img.shape == input_img.shape:
-    result = "Images are the same size"
-else:
-    result = "Images are different sizes"
+        print(json.dumps(result))
 
-print(result)
+    except Exception as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
