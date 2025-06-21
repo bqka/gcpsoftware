@@ -1,27 +1,25 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import path, { format } from "path";
+import path from "path";
 import { isDev } from "./util.js";
-import db from "./db.js";
+import { db, initializeDatabase } from "./db.js";
 import { getPreloadPath } from "./pathResolver.js";
 import fs from "fs";
 import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function addItem(
   tableName: string,
   validSequence: string,
   base64Images: string[]
 ) {
-  const imageDir = path.join(app.getAppPath(), "images", tableName);
+  const imageDir = path.join(app.getPath("userData"), "images", tableName);
   if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir, { recursive: true });
   }
 
-  const date = new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(Date.now());
-
-  // Validate number of images
   if (tableName === "singlewire" && base64Images.length !== 1) {
     throw new Error("Single wire must have exactly one image.");
   }
@@ -30,7 +28,6 @@ async function addItem(
     throw new Error("Double wire must have exactly two images.");
   }
 
-  // Generate image file names
   const imagePaths = base64Images.map((img, idx) => {
     const filename = `${Date.now()}_${idx}.png`;
     const filepath = path.join(imageDir, filename);
@@ -40,19 +37,18 @@ async function addItem(
   });
 
   let result;
-  // Insert based on wire type
   if (tableName === "singlewire") {
     result = await db("singlewire").insert({
       sequence: validSequence,
       path: imagePaths[0],
-      created_at: new Date(), // optional
+      created_at: new Date(),
     });
   } else if (tableName === "doublewire") {
     result = await db("doublewire").insert({
       sequence: validSequence,
       image_front: imagePaths[0],
       image_back: imagePaths[1],
-      created_at: new Date(), // optional
+      created_at: new Date(),
     });
   } else {
     throw new Error("Unknown wire type.");
@@ -61,7 +57,9 @@ async function addItem(
   console.log(result);
 }
 
-app.on("ready", () => {
+async function createMainWindow(){
+  await initializeDatabase();
+
   const mainWindow = new BrowserWindow({
     webPreferences: {
       preload: getPreloadPath(),
@@ -72,6 +70,10 @@ app.on("ready", () => {
   } else {
     mainWindow.loadFile(path.join(app.getAppPath(), "/dist-react/index.html"));
   }
+}
+
+app.on("ready", () => {
+  createMainWindow();
 });
 
 ipcMain.handle(
@@ -149,7 +151,7 @@ ipcMain.handle(
 
 ipcMain.handle(
   "add-item",
-  async (event, { tableName, validSequence, base64Image }) => {
+  async (_event, { tableName, validSequence, base64Image }) => {
     try {
       await addItem(tableName, validSequence, base64Image);
       console.log(`Inserted new item`);
@@ -161,15 +163,40 @@ ipcMain.handle(
 
 ipcMain.handle("remove-item", async (_, { table, id }) => {
   try {
+    const record = await db(table).where({ id }).first();
+    if (!record) {
+      console.log("Item not found.");
+      return;
+    }
+
+    const imagePaths: string[] = [];
+
+    if (table === "singlewire" && record.path) {
+      imagePaths.push(record.path);
+    } else if (table === "doublewire") {
+      if (record.image_front) imagePaths.push(record.image_front);
+      if (record.image_back) imagePaths.push(record.image_back);
+    }
+
+    for (const filePath of imagePaths) {
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (err) {
+        console.warn(`Failed to delete image at ${filePath}:`, err);
+      }
+    }
+
     const result = await db(table).where({ id }).del();
 
     if (result) {
-      console.log("Item removed.");
+      console.log("Item and image(s) removed.");
     } else {
-      console.log("Error removing item.");
+      console.log("Error removing item from database.");
     }
   } catch (error) {
-    console.error("Error removing item.");
+    console.error("Error in remove-item handler:", error);
   }
 });
 
@@ -177,9 +204,15 @@ ipcMain.handle(
   "compare-item",
   async (_event, { originalImage, imageToBeChecked, wireType }) => {
     return new Promise((resolve, reject) => {
-      const pythonPath =
-        "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-      const python = spawn(pythonPath, ["backend/compare.py"]);
+      // const pythonPath =
+      //   "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+      // const python = spawn(pythonPath, ["backend/compare.py"]);
+
+      const exePath = app.isPackaged
+        ? path.join(process.resourcesPath, "python-bin", "compare.exe")
+        : path.join(__dirname, "../python-bin/compare.exe");
+
+      const python = spawn(exePath);
 
       let output = "";
       let error = "";
@@ -219,24 +252,27 @@ ipcMain.handle(
 
 ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
   return new Promise((resolve, reject) => {
-    const pythonPath =
-      "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-    const python = spawn(pythonPath, ["backend/getsequence.py"]);
+    // const pythonPath =
+    //   "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+    // const python = spawn(pythonPath, ["backend/getsequence.py"]);
+
+    const exePath = app.isPackaged
+      ? path.join(process.resourcesPath, "python-bin", "getsequence.exe")
+      : path.join(__dirname, "../python-bin/getsequence.exe");
+
+    const python = spawn(exePath);
 
     let output = "";
     let error = "";
 
-    // Collect stdout
     python.stdout.on("data", (data) => {
       output += data.toString();
     });
 
-    // Collect stderr
     python.stderr.on("data", (data) => {
       error += data.toString();
     });
 
-    // On finish
     python.on("close", (code) => {
       if (code === 0) {
         const result = JSON.parse(output);
@@ -246,7 +282,6 @@ ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
       }
     });
 
-    // Send data to Python via stdin
     const payload = JSON.stringify({
       input: wireImages,
       wireType: wireType,
@@ -265,8 +300,7 @@ ipcMain.handle(
   ) => {
     try {
       const imageDir = path.join(
-        app.getAppPath(),
-        "images",
+        app.getPath("userData"),
         "results",
         wireType
       );
@@ -330,7 +364,7 @@ ipcMain.handle(
   "fetch-result-wire-image",
   async (_event, resultId): Promise<string[]> => {
     try {
-      console.log("ID: ", resultId)
+      console.log("ID: ", resultId);
       const result = await db("results")
         .where({ id: resultId })
         .select("image_front", "image_back")

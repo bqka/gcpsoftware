@@ -15,15 +15,13 @@ def base64_to_cv2_image(base64_str):
 
 def get_single_sequence(image):
     # RUN ALGORITHM
-    return "TESTSEQUENCE"
+    return [{"sequence": "TESTSEQUENCE1"}]
 
-def get_double_sequence(original, input_image):
-    # Dummy example logic
-    diff = cv2.absdiff(original, input_image)
-    non_zero = np.count_nonzero(diff)
-    total = diff.size
-    similarity = 1 - (non_zero / total)
-    return {"result": "match" if similarity > 0.9 else "mismatch", "score": round(similarity, 2)}
+def get_double_sequence(front_image, back_image):
+    return [
+            {"sequence": "TESTSEQUENCE1"},
+            {"sequence": "TESTSEQUENCE2"}
+        ]
 
 def main():
     try:
@@ -37,7 +35,7 @@ def main():
             image_cv2 = base64_to_cv2_image(images[0])
             result = get_single_sequence(image_cv2)
         elif wire_type == "doublewire":
-            result = get_single_sequence(images[0])
+            result = get_double_sequence(images[0], images[1])
         else:
             raise ValueError("Invalid wire type")
 

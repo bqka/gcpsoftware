@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { TestTube, ArrowRight, User, AlertCircle } from "lucide-react"
+import { ArrowRight, User, AlertCircle } from "lucide-react"
 import { useUser } from "./UserContext"
 
 export default function LoginLandingPage() {
@@ -62,11 +62,8 @@ export default function LoginLandingPage() {
       <div className="w-full max-w-md">
         {/* Logo and Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-600 rounded-full mb-4 shadow-lg shadow-gray-600/25">
-            <TestTube className="h-8 w-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-50 mb-2">WireTest Pro</h1>
-          <p className="text-gray-300">Professional Wire Testing Solution</p>
+          <h1 className="text-3xl font-bold text-gray-50 mb-2">Wire Testing Software</h1>
+          <p className="text-gray-300">Wire Harness Color Sequence Verification Software</p>
         </div>
 
         {/* Login Card */}

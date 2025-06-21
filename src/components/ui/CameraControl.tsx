@@ -28,13 +28,15 @@ const CameraControl: React.FC<CameraControlProps> = ({
   setSelectedCamera,
   cameras,
 }) => {
-  const selectedCameraLabel = cameras.find(
-    (camera) => camera.deviceId === selectedCamera
-  )?.label;
-  
+  const selectedCameraLabel =
+    cameras.find((camera) => camera.deviceId === selectedCamera)?.label;
+
   return (
     <div className="flex flex-row items-center gap-4 justify-items-start w-full mt-2">
-      <Button onClick={isCameraOn ? disableVideoStream : enableVideoStream} variant={isCameraOn ? "destructive" : "default"}>
+      <Button
+        onClick={isCameraOn ? disableVideoStream : enableVideoStream}
+        variant={isCameraOn ? "destructive" : "default"}
+      >
         <Power className="size-4" />
         {isCameraOn ? "Turn Camera Off" : "Turn Camera On"}
       </Button>
@@ -42,15 +44,19 @@ const CameraControl: React.FC<CameraControlProps> = ({
         <div className="relative">
           <div className="w-[200px]">
             <Select
-              value={selectedCameraLabel || ""}
+              value={selectedCamera || ""}
               onValueChange={(value) => setSelectedCamera(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select Camera" />
+                <SelectValue placeholder="Select Camera">
+                  {selectedCameraLabel ||
+                    cameras.find((c) => c.deviceId === selectedCamera)?.label ||
+                    "Select Camera"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="w-[200px] max-w-full">
                 {cameras.map((camera, index) => (
-                  <SelectItem key={camera.deviceId} value={camera.label}>
+                  <SelectItem key={camera.deviceId} value={camera.deviceId}>
                     {camera.label || `Camera ${index + 1}`}
                   </SelectItem>
                 ))}

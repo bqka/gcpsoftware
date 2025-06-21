@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,10 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Camera, RotateCcw, Save, Check, AlertCircle } from "lucide-react";
 import CameraFeed from "@/components/ui/CameraFeed";
 import BackButton from "../../components/ui/BackButton";
-
-type getSequenceResult = {
-  sequence: string;
-};
 
 export default function AddItemPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -32,6 +28,7 @@ export default function AddItemPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<boolean>(true);
+  const [detSequence, setDetSequence] = useState<string[]>([]);
 
   const isDoubleWire = wireType === "doublewire";
   const totalSteps = isDoubleWire ? 2 : 1;
@@ -119,9 +116,7 @@ export default function AddItemPage() {
           setError("Could not process back image");
           return;
         }
-        const detectedSequence: getSequenceResult =
-          await window.electron.getSequence([frontImage, backImage], wireType);
-        if (match || sequence === detectedSequence.sequence) {
+        if (match || (sequence === detSequence[0] && sequence === detSequence[1])) {
           await window.electron.addItem(wireType, sequence, [
             frontImage,
             backImage,
@@ -130,9 +125,7 @@ export default function AddItemPage() {
           alert("Color Sequence Mismatch, Adding to Mismatch List");
         }
       } else {
-        const detectedSequence: getSequenceResult =
-          await window.electron.getSequence([frontImage], wireType);
-        if (match || sequence == detectedSequence.sequence) {
+        if (match || sequence == detSequence[0]) {
           await window.electron.addItem(wireType, sequence, [frontImage]);
         } else {
           alert("Color Sequence Mismatch, Adding to Mismatch List");
@@ -170,6 +163,45 @@ export default function AddItemPage() {
     if (isDoubleWire && !backImage && currentStep === "back") return true;
     return false;
   };
+
+  const getDetectedSequence = async () => {
+    if (!frontImage) {
+      setError("Could not process front image.");
+      return;
+    }
+    if (isDoubleWire) {
+      if (!backImage) {
+        setError("Could not process back image");
+        return;
+      }
+      return await window.electron.getSequence(
+        [frontImage, backImage],
+        wireType
+      );
+    } else {
+      return await window.electron.getSequence([frontImage], wireType);
+    }
+  };
+
+  useEffect(() => {
+    if (currentStep === "complete") {
+      const fetchSequence = async () => {
+        try {
+          const detected = await getDetectedSequence();
+          if (!detected) throw new Error("Error detecting sequence.");
+          if (detected?.length === 1) {
+            setDetSequence([detected[0].sequence]);
+          } else {
+            setDetSequence([detected[0].sequence, detected[1].sequence]);
+          }
+        } catch (err) {
+          console.error("Error detecting sequence:", err);
+          setError("An error occurred while detecting the sequence.");
+        }
+      };
+      fetchSequence();
+    }
+  }, [currentStep]);
 
   const canSave = sequence.trim() && frontImage && (!isDoubleWire || backImage);
 
@@ -333,13 +365,15 @@ export default function AddItemPage() {
                       </Button>
                     )}
                   </div>
-                  <div className="aspect-video w-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
+                  <div className="aspect-video w-full border border-gray-300 rounded-lg overflow-hidden">
                     {frontImage ? (
-                      <img
-                        src={frontImage || "/placeholder.svg"}
-                        alt="Front view"
-                        className="w-full h-full object-cover"
-                      />
+                      <div className="w-full h-full">
+                        <img
+                          src={frontImage}
+                          alt="Front view"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500">
                         <div className="text-center">
@@ -349,6 +383,14 @@ export default function AddItemPage() {
                       </div>
                     )}
                   </div>
+                  {detSequence[0] && (
+                    <p className="text-sm text-gray-300">
+                      Detected Sequence:{" "}
+                      <span className="font-mono text-white">
+                        {detSequence[0]}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Back Image (for double wire) */}
@@ -368,13 +410,15 @@ export default function AddItemPage() {
                         </Button>
                       )}
                     </div>
-                    <div className="aspect-video w-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
+                    <div className="aspect-video w-full border border-gray-300 rounded-lg overflow-hidden">
                       {backImage ? (
-                        <img
-                          src={backImage || "/placeholder.svg"}
-                          alt="Back view"
-                          className="w-full h-full object-cover"
-                        />
+                        <div className="w-full h-full">
+                          <img
+                            src={backImage}
+                            alt="Back view"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-500">
                           <div className="text-center">
@@ -384,6 +428,14 @@ export default function AddItemPage() {
                         </div>
                       )}
                     </div>
+                    {detSequence[1] && (
+                      <p className="text-sm text-gray-300">
+                        Detected Sequence:{" "}
+                        <span className="font-mono text-white">
+                          {detSequence[1]}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -418,6 +470,35 @@ export default function AddItemPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Progress Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Progress Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span>Front Image</span>
+                <Badge variant={frontImage ? "default" : "secondary"}>
+                  {frontImage ? "Captured" : "Pending"}
+                </Badge>
+              </div>
+              {isDoubleWire && (
+                <div className="flex items-center justify-between text-sm">
+                  <span>Back Image</span>
+                  <Badge variant={backImage ? "default" : "secondary"}>
+                    {backImage ? "Captured" : "Pending"}
+                  </Badge>
+                </div>
+              )}
+              <div className="flex items-center justify-between text-sm">
+                <span>Item Name</span>
+                <Badge variant={sequence.trim() ? "default" : "secondary"}>
+                  {sequence.trim() ? "Added" : "Pending"}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

@@ -30,7 +30,7 @@ interface Window {
         addItem: (tableName: string, validSequence: string, base64Image: string[]) => Promise<void>;
         compareItem: (originalImage: string[], imageToBeChecked: string[], wireType: string) => Promise<ComparisonResult>;
         fetchWireImage: (selectedWireId: number, wireType: string) => Promise<string[] | null>;
-        getSequence: (wireImages: string[], wireType: string) => Promise<getSequenceResult>;
+        getSequence: (wireImages: string[], wireType: string) => Promise<getSequenceResult[]>;
         addResult: (wireType: string, wireId: number, result: boolean, details: string, tested_by: string, base64Images: string[]) => Promise<void>;
         fetchResults: (wireType: string) => Promise<ResultRow[]>;
         fetchResultDetails: (resultId: number) => Promise<string>;
