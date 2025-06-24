@@ -29,6 +29,7 @@ export default function AddItemPage() {
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<boolean>(true);
   const [detSequence, setDetSequence] = useState<string[]>([]);
+  const [isDetecting, setIsDetecting] = useState<boolean>(false);
 
   const isDoubleWire = wireType === "doublewire";
   const totalSteps = isDoubleWire ? 2 : 1;
@@ -93,6 +94,7 @@ export default function AddItemPage() {
       setBackImage(null);
       setCurrentStep("back");
     }
+    setDetSequence([]);
     setError(null);
   };
 
@@ -116,7 +118,10 @@ export default function AddItemPage() {
           setError("Could not process back image");
           return;
         }
-        if (match || (sequence === detSequence[0] && sequence === detSequence[1])) {
+        if (
+          match ||
+          (sequence === detSequence[0] && sequence === detSequence[1])
+        ) {
           await window.electron.addItem(wireType, sequence, [
             frontImage,
             backImage,
@@ -186,6 +191,7 @@ export default function AddItemPage() {
   useEffect(() => {
     if (currentStep === "complete") {
       const fetchSequence = async () => {
+        setIsDetecting(true);
         try {
           const detected = await getDetectedSequence();
           if (!detected) throw new Error("Error detecting sequence.");
@@ -197,6 +203,8 @@ export default function AddItemPage() {
         } catch (err) {
           console.error("Error detecting sequence:", err);
           setError("An error occurred while detecting the sequence.");
+        } finally {
+          setIsDetecting(false);
         }
       };
       fetchSequence();
@@ -295,14 +303,21 @@ export default function AddItemPage() {
                       variant="outline"
                       onClick={() =>
                         handleRetake(
-                          (currentStep === "back" || currentStep == "complete") && backImage ? "back" : "front"
+                          (currentStep === "back" ||
+                            currentStep == "complete") &&
+                            backImage
+                            ? "back"
+                            : "front"
                         )
                       }
                       className="flex items-center gap-2"
                     >
                       <RotateCcw className="h-4 w-4" />
                       Retake{" "}
-                      {(currentStep === "back" || currentStep == "complete") && backImage ? "Back" : "Front"}
+                      {(currentStep === "back" || currentStep == "complete") &&
+                      backImage
+                        ? "Back"
+                        : "Front"}
                     </Button>
                   )}
                   <Button onClick={() => setMatch(!match)}>
@@ -383,14 +398,17 @@ export default function AddItemPage() {
                       </div>
                     )}
                   </div>
-                  {detSequence[0] && (
-                    <p className="text-sm text-gray-300">
-                      Detected Sequence:{" "}
-                      <span className="font-mono text-white">
-                        {detSequence[0]}
-                      </span>
-                    </p>
-                  )}
+                  {currentStep === "complete" &&
+                    (isDetecting ? (
+                      <span className="font-mono text-white text-sm">Loading...</span>
+                    ) : (
+                      <p className="text-sm text-gray-300">
+                        Detected Sequence:{" "}
+                        <span className="font-mono text-white">
+                          {detSequence[0]}
+                        </span>
+                      </p>
+                    ))}
                 </div>
 
                 {/* Back Image (for double wire) */}
@@ -428,14 +446,17 @@ export default function AddItemPage() {
                         </div>
                       )}
                     </div>
-                    {detSequence[1] && (
-                      <p className="text-sm text-gray-300">
-                        Detected Sequence:{" "}
-                        <span className="font-mono text-white">
-                          {detSequence[1]}
-                        </span>
-                      </p>
-                    )}
+                    {currentStep === "complete" &&
+                      (isDetecting ? (
+                        <span className="font-mono text-white text-sm">Loading...</span>
+                      ) : (
+                        <p className="text-sm text-gray-300">
+                          Detected Sequence:{" "}
+                          <span className="font-mono text-white">
+                            {detSequence[1]}
+                          </span>
+                        </p>
+                      ))}
                   </div>
                 )}
               </CardContent>
