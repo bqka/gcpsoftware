@@ -295,14 +295,14 @@ export default function AddItemPage() {
                       variant="outline"
                       onClick={() =>
                         handleRetake(
-                          currentStep === "back" && backImage ? "back" : "front"
+                          (currentStep === "back" || currentStep == "complete") && backImage ? "back" : "front"
                         )
                       }
                       className="flex items-center gap-2"
                     >
                       <RotateCcw className="h-4 w-4" />
                       Retake{" "}
-                      {currentStep === "back" && backImage ? "Back" : "Front"}
+                      {(currentStep === "back" || currentStep == "complete") && backImage ? "Back" : "Front"}
                     </Button>
                   )}
                   <Button onClick={() => setMatch(!match)}>
@@ -470,35 +470,6 @@ export default function AddItemPage() {
               </CardContent>
             </Card>
           </div>
-
-          {/* Progress Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Progress Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span>Front Image</span>
-                <Badge variant={frontImage ? "default" : "secondary"}>
-                  {frontImage ? "Captured" : "Pending"}
-                </Badge>
-              </div>
-              {isDoubleWire && (
-                <div className="flex items-center justify-between text-sm">
-                  <span>Back Image</span>
-                  <Badge variant={backImage ? "default" : "secondary"}>
-                    {backImage ? "Captured" : "Pending"}
-                  </Badge>
-                </div>
-              )}
-              <div className="flex items-center justify-between text-sm">
-                <span>Item Name</span>
-                <Badge variant={sequence.trim() ? "default" : "secondary"}>
-                  {sequence.trim() ? "Added" : "Pending"}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>
