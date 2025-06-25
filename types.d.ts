@@ -1,5 +1,8 @@
-type SingleWire = {
+type Wire = {
   id: number;
+  wire_type: string;
+  image_front: string;
+  image_back: string | null;
   sequence: string;
   created_at: string;
 }
@@ -9,9 +12,20 @@ type ComparisonResult = {
   details: string;
 };
 
-type getSequenceResult = {
-  sequence: string;
-}
+type RGB = [number, number, number];
+
+type SingleWireSequence = {
+  type: "singlewire";
+  sequence: RGB[];
+};
+
+type DoubleWireSequence = {
+  type: "doublewire";
+  sequence_front: RGB[];
+  sequence_back: RGB[];
+};
+
+type WireSequenceResult = SingleWireSequence | DoubleWireSequence;
 
 type ResultRow = {
   id: number;
@@ -23,17 +37,28 @@ type ResultRow = {
   tested_by: string;
 }
 
+type MismatchRow = {
+  id: number;
+  sequence: string;
+  image_front: string;
+  image_back: string | null;
+  date: string;
+}
+
 interface Window {
     electron: {
-        fetchWireData: (tableName: string) => Promise<SingleWire[]>;
-        removeItem: (table: string, id: number) => Promise<void>;
-        addItem: (tableName: string, validSequence: string, base64Image: string[]) => Promise<void>;
-        compareItem: (originalImage: string[], imageToBeChecked: string[], wireType: string) => Promise<ComparisonResult>;
-        fetchWireImage: (selectedWireId: number, wireType: string) => Promise<string[] | null>;
-        getSequence: (wireImages: string[], wireType: string) => Promise<getSequenceResult[]>;
-        addResult: (wireType: string, wireId: number, result: boolean, details: string, tested_by: string, base64Images: string[]) => Promise<void>;
-        fetchResults: (wireType: string) => Promise<ResultRow[]>;
+        fetchData<T>(tableName: string, wireType: string): Promise<T[]>;
+        fetchRow<T>(tableName: string, id: number): Promise<T>;
+        fetchImages: (tableName: string, wireType: string, selectedId: number) => Promise<string[] | null>;
         fetchResultDetails: (resultId: number) => Promise<string>;
-        fetchResultWireImage: (resultId: number) => Promise<string[]>;
+
+        addWire: (wireType: string, sequence: string, base64Images: string[]) => Promise<void>;
+        addResult: (wireType: string, wireId: number, result: boolean, details: string, tested_by: string, base64Images: string[]) => Promise<void>;
+        addMismatch: (wireType: string, sequence: string, base64Images: string[]) => Promise<void>;
+        
+        removeItem: (table: string, id: number) => Promise<void>;
+
+        compareItem: (wireCount: number[], originalImage: string[], imageToBeChecked: string[], wireType: string) => Promise<ComparisonResult>;
+        getSequence: (wireImages: string[], wireType: string) => Promise<WireSequenceResult>;
     }
 }

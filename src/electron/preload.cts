@@ -1,14 +1,15 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
-  fetchWireData: (tableName: string) => ipcRenderer.invoke("fetch-wire", tableName),
+  fetchData: (tableName: string, wireType: string) => ipcRenderer.invoke("fetch-data", {tableName, wireType}),
+  fetchRow: (tableName: string, id: number) => ipcRenderer.invoke("fetch-row", {tableName, id}),
+  fetchImages: (tableName: string, wireType: string, selectedId: number) => ipcRenderer.invoke("fetch-image", {tableName, wireType, selectedId}),
   removeItem: (table: string, id: number) => ipcRenderer.invoke("remove-item", { table, id }),
-addItem: (tableName: string, validSequence: string, base64Image: string) => ipcRenderer.invoke("add-item", {tableName, validSequence, base64Image}),
-  compareItem: (originalImage: string[], imageToBeChecked: string[], wireType: string) => ipcRenderer.invoke("compare-item", {originalImage, imageToBeChecked, wireType}),
-  fetchWireImage: (selectedWireId: number, wireType: string) => ipcRenderer.invoke("fetch-wire-image", {selectedWireId, wireType}),
-  getSequence: (wireImages: string[], wireType: string) => ipcRenderer.invoke("get-sequence", {wireImages, wireType}),
+  addWire: (wireType: string, sequence: string, base64Images: string[]) => ipcRenderer.invoke("add-wire", {wireType, sequence, base64Images}),
   addResult: (wireType: string, wireId: number, result: boolean, details: string, tested_by: string, base64images: string[]) => ipcRenderer.invoke("add-result", {wireType, wireId, result, details, tested_by, base64images}),
-  fetchResults: (wireType: string) => ipcRenderer.invoke("fetch-results", wireType),
   fetchResultDetails: (resultId: number) => ipcRenderer.invoke("fetch-result-details", resultId),
-  fetchResultWireImage: (resultId: number) => ipcRenderer.invoke("fetch-result-wire-image", resultId)
+  addMismatch: (wireType: string, sequence:string, base64images: string[]) => ipcRenderer.invoke("add-mismatch", {wireType, sequence, base64images}),
+
+  compareItem: (wireCount: number[], originalImage: string[], imageToBeChecked: string[], wireType: string) => ipcRenderer.invoke("compare-item", {wireCount, originalImage, imageToBeChecked, wireType}),
+  getSequence: (wireImages: string[], wireType: string) => ipcRenderer.invoke("get-sequence", {wireImages, wireType}),
 });

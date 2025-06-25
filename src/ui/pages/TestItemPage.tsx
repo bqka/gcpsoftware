@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,11 @@ export default function TestItemPage() {
   const [testImages, setTestImages] = useState<string[]>([]);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+
   const { username } = useUsername();
+  const location = useLocation();
+  const wireCount = (location.state as { wireCount?: number[] })?.wireCount ?? [];
 
   const isDoubleWire = wireType === "doublewire";
   const requiredImages = isDoubleWire ? 2 : 1;
@@ -57,9 +61,10 @@ export default function TestItemPage() {
   const fetchWireImages = async () => {
     if (!selectedId) return;
     try {
-      const result = await window.electron.fetchWireImage(
+      const result = await window.electron.fetchImages(
+        "wires",
+        wireTypeSafe,
         selectedWireId,
-        wireType || "singlewire"
       );
       if (!result) {
         throw new Error("Error calling fetchWireImage API");
@@ -117,13 +122,16 @@ export default function TestItemPage() {
     }
 
     try {
+      setIsTesting(true);
       const testImagesStripped = testImages.map(testImage => testImage.replace(/^data:image\/\w+;base64,/, ""));
 
       const result: ComparisonResult = await window.electron.compareItem(
+        wireCount,
         refImages,
         testImagesStripped,
         wireTypeSafe
       );
+
       if (result?.match === true) {
         alert("RESULT: OK");
       } else {
@@ -131,9 +139,12 @@ export default function TestItemPage() {
       }
 
       if(!username) throw new Error("No Username provided")
-      await window.electron.addResult(wireTypeSafe, selectedWireId, result.match, result.details, username, testImages)
+      await window.electron.addResult(wireTypeSafe, selectedWireId, result.match, result.details, username, testImages);
+
     } catch (error) {
       console.error("Error comparing:", error);
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -294,7 +305,7 @@ export default function TestItemPage() {
                     className="ml-auto flex items-center gap-2"
                   >
                     <Check className="h-4 w-4" />
-                    Run Test
+                    {isTesting ? ("Testing..."): ("Run Test")}
                   </Button>
                 </div>
               </CardContent>

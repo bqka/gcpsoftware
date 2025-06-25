@@ -265,12 +265,12 @@ def main():
         if wire_type == "singlewire":
             image_cv2 = base64_to_cv2_image(images[0])
             result = get_single_sequence(image_cv2)
-            print(json.dumps([{"sequence": json.dumps(result[1])}]))
+            print(json.dumps({"type": "singlewire", "sequence": result[1]}))
         elif wire_type == "doublewire":
             front_cv2 = base64_to_cv2_image(images[0])
             back_cv2 = base64_to_cv2_image(images[1])
             front_result, back_result = get_double_sequence(front_cv2, back_cv2)
-            print(json.dumps([{"sequence": json.dumps(front_result[1])}, {"sequence": json.dumps(back_result[1])}]))
+            print(json.dumps({"type": "doublewire", "sequence_front": front_result[1], "sequence_back": back_result[1]}))
         else:
             raise ValueError("Invalid wire type")
     except Exception as e:

@@ -28,9 +28,7 @@ export default function ResultPage() {
     setIsLoadingData(true)
     setError(null)
     try {
-      console.log("selectedWireType:", selectedWireType, typeof selectedWireType)
-
-      const result = await window.electron.fetchResults(selectedWireType)
+      const result = await window.electron.fetchData<ResultRow>("results", selectedWireType)
       setData(result)
       console.log(result)
     } catch (error) {
@@ -61,7 +59,7 @@ export default function ResultPage() {
     setIsLoadingImage(true)
     try {
       console.log("CALLING WIRE IMAGE: ", id)
-      const result = await window.electron.fetchResultWireImage(id)
+      const result = await window.electron.fetchImages("results", selectedWireType, id);
 
       if (result) return result;
     } catch (error) {
@@ -94,7 +92,7 @@ export default function ResultPage() {
     const loadData = async () => {
       if (selectedResultId) {
         const images = await fetchResultWireImage(selectedResultId)
-        const details = await window.electron.fetchResultDetails(selectedResultId)
+        const details = (await window.electron.fetchRow<ResultRow>("results", selectedResultId)).details
         if (images) {
           setSelectedWireImages(images)
         }

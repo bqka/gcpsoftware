@@ -9,6 +9,7 @@ import TestItemPage from "./pages/TestItemPage.tsx";
 import ResultPage from "./pages/ResultPage.tsx";
 import LoginLandingPage from "./pages/LoginPage.tsx";
 import { UsernameProvider, WireTypeProvider } from "./pages/AppContexts.tsx";
+import MismatchPage from "./pages/MismatchPage.tsx";
 
 const router = createHashRouter([
   {
@@ -30,6 +31,10 @@ const router = createHashRouter([
   {
     path: "/results",
     element: <ResultPage />
+  },
+  {
+    path: "/mismatch",
+    element: <MismatchPage />
   }
 ]);
 

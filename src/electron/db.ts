@@ -16,23 +16,14 @@ const dbConfig: Knex.Config = {
 export const db: Knex = knex(dbConfig);
 
 export async function initializeDatabase() {
-  const hasDoubleWire = await db.schema.hasTable("doublewire");
-  if (!hasDoubleWire) {
-    await db.schema.createTable("doublewire", (table) => {
+  const hasWires = await db.schema.hasTable("wires");
+  if (!hasWires) {
+    await db.schema.createTable("wires", (table) => {
       table.increments("id").primary();
-      table.text("sequence");
-      table.text("image_front");
+      table.text("wire_type").notNullable();
+      table.text("sequence").notNullable();
+      table.text("image_front").notNullable();
       table.text("image_back");
-      table.timestamp("created_at").defaultTo(db.fn.now());
-    });
-  }
-
-  const hasSingleWire = await db.schema.hasTable("singlewire");
-  if (!hasSingleWire) {
-    await db.schema.createTable("singlewire", (table) => {
-      table.increments("id").primary();
-      table.text("sequence");
-      table.text("path");
       table.timestamp("created_at").defaultTo(db.fn.now());
     });
   }
@@ -41,15 +32,27 @@ export async function initializeDatabase() {
   if (!hasResults) {
     await db.schema.createTable("results", (table) => {
       table.increments("id").primary();
-      table.text("wire_type");
-      table.integer("wire_id");
-      table.boolean("result");
-      table.text("details");
+      table.text("wire_type").notNullable();
+      table.integer("wire_id").notNullable();
+      table.boolean("result").notNullable();
+      table.text("details").notNullable();
       table.timestamp("compared_at").defaultTo(db.fn.now());
-      table.text("tested_by");
-      table.text("image_front");
+      table.text("tested_by").notNullable();
+      table.text("image_front").notNullable();
       table.text("image_back");
     });
+  }
+
+  const hasMismatch = await db.schema.hasTable("mismatch");
+  if(!hasMismatch){
+    await db.schema.createTable("mismatch", (table) => {
+      table.increments("id").primary();
+      table.timestamp("date").defaultTo(db.fn.now());
+      table.text("wire_type").notNullable();
+      table.text("sequence").notNullable();
+      table.text("image_front").notNullable();
+      table.text("image_back");
+    })
   }
 
   console.log("All tables initialized.");

@@ -173,20 +173,20 @@ def compare_double(original, input_image):
 
     return {"match": overall_match, "details": details}
 
-
 def main():
     try:
         raw_input = sys.stdin.read()
         data = json.loads(raw_input)
-
+        
+        wire_count = data["wire_count"]
         ref_images = base64_to_cv2_image(data["original"])
         test_images = base64_to_cv2_image(data["input"])
         wire_type = data["wireType"]
 
         if wire_type == "singlewire":
-            result = compare_single(ref_images, test_images)
+            result = compare_single([wire_count[0], ref_images[0]], test_images[0])
         elif wire_type == "doublewire":
-            result = compare_double(ref_images, test_images)
+            result = compare_double([[wire_count[0], ref_images[0]], [wire_count[1], ref_images[1]]], test_images)
         else:
             raise ValueError("Invalid wire type")
 

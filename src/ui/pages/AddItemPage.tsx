@@ -118,26 +118,18 @@ export default function AddItemPage() {
           setError("Could not process back image");
           return;
         }
-        if (
-          match ||
-          (sequence === detSequence[0] && sequence === detSequence[1])
-        ) {
-          await window.electron.addItem(wireType, detSequence.toString(), [
+          await window.electron.addWire(wireType, JSON.stringify(detSequence), [
             frontImage,
             backImage,
           ]);
-        } else {
-          alert("Color Sequence Mismatch, Adding to Mismatch List");
-        }
       } else {
-        if (match || sequence == detSequence[0]) {
-          await window.electron.addItem(wireType, detSequence.toString(), [frontImage]);
-        } else {
-          alert("Color Sequence Mismatch, Adding to Mismatch List");
-        }
+          await window.electron.addWire(wireType, JSON.stringify(detSequence), [
+            frontImage,
+          ]);
       }
 
       setSequence("");
+      setDetSequence([]);
       setFrontImage(null);
       setBackImage(null);
       setCurrentStep("front");
@@ -146,6 +138,38 @@ export default function AddItemPage() {
       console.error("Save error:", err);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleInvalid = async () => {
+    try {
+      if (!frontImage) {
+        setError("Could not process back image");
+        return;
+      }
+      if (isDoubleWire) {
+        if (!backImage) {
+          setError("Could not process back image");
+          return;
+        }
+        await window.electron.addMismatch(wireType, detSequence.toString(), [
+          frontImage,
+          backImage,
+        ]);
+      } else {
+          await window.electron.addMismatch(wireType, detSequence.toString(), [
+            frontImage,
+          ]);
+      }
+
+      setSequence("");
+      setFrontImage(null);
+      setDetSequence([]);
+      setBackImage(null);
+      setCurrentStep("front");
+    } catch (err) {
+      setError("Failed to add item to mismatch list. Please try again.");
+      console.error("Save error:", err);
     }
   };
 
@@ -195,10 +219,10 @@ export default function AddItemPage() {
         try {
           const detected = await getDetectedSequence();
           if (!detected) throw new Error("Error detecting sequence.");
-          if (detected?.length === 1) {
-            setDetSequence([detected[0].sequence]);
+          if (detected.type === "singlewire") {
+            setDetSequence([JSON.stringify(detected.sequence)]);
           } else {
-            setDetSequence([detected[0].sequence, detected[1].sequence]);
+            setDetSequence([JSON.stringify(detected.sequence_front), JSON.stringify(detected.sequence_back)]);
           }
         } catch (err) {
           console.error("Error detecting sequence:", err);
@@ -344,15 +368,26 @@ export default function AddItemPage() {
                   />
                 </div>
 
-                <Button
-                  onClick={handleSave}
-                  disabled={!canSave || isSaving}
-                  className="w-full flex items-center gap-2"
-                  size="lg"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSaving ? "Saving..." : "Save Item"}
-                </Button>
+                <div className="flex flex-row gap-4 items-center">
+                  <Button
+                    onClick={handleSave}
+                    disabled={(!canSave || isSaving ) && (detSequence.length > 0)}
+                    className="flex items-center gap-2"
+                    size="lg"
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSaving ? "Saving..." : "Save Item"}
+                  </Button>
+
+                  <Button
+                    size="lg"
+                    variant="destructive"
+                    disabled={detSequence.length === 0}
+                    onClick={handleInvalid}
+                  >
+                    Invalid
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -400,7 +435,9 @@ export default function AddItemPage() {
                   </div>
                   {currentStep === "complete" &&
                     (isDetecting ? (
-                      <span className="font-mono text-white text-sm">Loading...</span>
+                      <span className="font-mono text-white text-sm">
+                        Loading...
+                      </span>
                     ) : (
                       <p className="text-sm text-gray-300">
                         Detected Sequence:{" "}
@@ -448,7 +485,9 @@ export default function AddItemPage() {
                     </div>
                     {currentStep === "complete" &&
                       (isDetecting ? (
-                        <span className="font-mono text-white text-sm">Loading...</span>
+                        <span className="font-mono text-white text-sm">
+                          Loading...
+                        </span>
                       ) : (
                         <p className="text-sm text-gray-300">
                           Detected Sequence:{" "}
