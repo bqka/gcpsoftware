@@ -22,8 +22,8 @@ More scripts are in package.json
 If there are changes made to the backend scripts, build them into a .exe file first by
 
 ```bash
-pyinstaller --onefile backend/compare.py
-pyinstaller --onefile backend/getsequence.py
+pyinstaller --onefile --clean --strip --distpath python-bin/ backend/compare.py
+pyinstaller --onefile --clean --strip --distpath python-bin/ backend/getsequence.py
 ```
 
 Then build the app by

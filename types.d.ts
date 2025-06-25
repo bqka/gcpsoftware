@@ -50,7 +50,6 @@ interface Window {
         fetchData<T>(tableName: string, wireType: string): Promise<T[]>;
         fetchRow<T>(tableName: string, id: number): Promise<T>;
         fetchImages: (tableName: string, wireType: string, selectedId: number) => Promise<string[] | null>;
-        fetchResultDetails: (resultId: number) => Promise<string>;
 
         addWire: (wireType: string, sequence: string, base64Images: string[]) => Promise<void>;
         addResult: (wireType: string, wireId: number, result: boolean, details: string, tested_by: string, base64Images: string[]) => Promise<void>;
