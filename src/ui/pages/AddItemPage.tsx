@@ -27,7 +27,6 @@ export default function AddItemPage() {
   );
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [match, setMatch] = useState<boolean>(true);
   const [detSequence, setDetSequence] = useState<string[]>([]);
   const [isDetecting, setIsDetecting] = useState<boolean>(false);
 
@@ -344,9 +343,6 @@ export default function AddItemPage() {
                         : "Front"}
                     </Button>
                   )}
-                  <Button onClick={() => setMatch(!match)}>
-                    {match ? "Match Mode" : "Mismatch Mode"}
-                  </Button>
                 </div>
               </CardContent>
             </Card>
