@@ -5,29 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { columns } from "./mismatch-table/columns"
-import { DataTable } from "./mismatch-table/data-table"
+import { columns } from "./columns"
+import { DataTable } from "./data-table"
 import { ImageIcon, AlertCircle, Loader2 } from "lucide-react"
 import BackButton from "@/components/ui/BackButton"
 
-export default function MismatchPage() {
+export default function ResultPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
-  const [data, setData] = useState<MismatchRow[]>([])
+  const [data, setData] = useState<ResultRow[]>([])
   const [selectedWireType, setSelectedWireType] = useState<string>("singlewire")
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedResultId, setSelectedResultId] = useState<number | null>(null)
   const [selectedWireImages, setSelectedWireImages] = useState<string[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [isLoadingImage, setIsLoadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resultDetails, setResultDetails] = useState<string | null>(null)
 
   const isDoubleWire = selectedWireType === "doublewire"
 
-  const fetchData = async () => {
+  const fetchResultData = async () => {
     setIsLoadingData(true)
     setError(null)
     try {
-      const result = await window.electron.fetchData<MismatchRow>("mismatch", selectedWireType)
+      const result = await window.electron.fetchData<ResultRow>("results", selectedWireType)
       setData(result)
       console.log(result)
     } catch (error) {
@@ -40,12 +41,12 @@ export default function MismatchPage() {
 
   const removeItem = async (id: number) => {
     try {
-      await window.electron.removeItem("mismatch", id)
-      await fetchData()
+      await window.electron.removeItem("results", id)
+      await fetchResultData()
 
       // Clear selection if the removed item was selected
-      if (selectedId === id) {
-        setSelectedId(null)
+      if (selectedResultId === id) {
+        setSelectedResultId(null)
         setSelectedWireImages([])
       }
     } catch (error) {
@@ -54,11 +55,11 @@ export default function MismatchPage() {
     }
   }
 
-  //change
-  const fetchWireImages = async (id: number) => {
+  const fetchResultWireImage = async (id: number) => {
     setIsLoadingImage(true)
     try {
-      const result = await window.electron.fetchImages("mismatch", selectedWireType, id);
+      console.log("CALLING WIRE IMAGE: ", id)
+      const result = await window.electron.fetchImages("results", selectedWireType, id);
 
       if (result) return result;
     } catch (error) {
@@ -71,35 +72,39 @@ export default function MismatchPage() {
 
   const handleTabChange = (value: string) => {
     setSelectedWireType(value)
-    setSelectedId(null) // Clear selection when switching tabs
+    setSelectedResultId(null) // Clear selection when switching tabs
     setSelectedWireImages([]) // Clear images when switching tabs
+    setResultDetails(null) // Clear result details when switching tabs
   }
 
   // Load initial data
   useEffect(() => {
-    fetchData()
+    fetchResultData()
   }, [])
 
   // Load data when wire type changes
   useEffect(() => {
-    fetchData()
+    fetchResultData()
   }, [selectedWireType])
 
   // Load images when item is selected
   useEffect(() => {
     const loadData = async () => {
-      if (selectedId) {
-        const images = await fetchWireImages(selectedId)
+      if (selectedResultId) {
+        const images = await fetchResultWireImage(selectedResultId)
+        const details = (await window.electron.fetchRow<ResultRow>("results", selectedResultId)).details
         if (images) {
           setSelectedWireImages(images)
         }
+        if (details) setResultDetails(details)
       } else {
         setSelectedWireImages([])
+        setResultDetails(null)
       }
     }
 
     loadData()
-  }, [selectedId, selectedWireType])
+  }, [selectedResultId, selectedWireType])
 
   const getImageLabel = (index: number) => {
     if (isDoubleWire) {
@@ -114,8 +119,8 @@ export default function MismatchPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-50 mb-2">Mismatches</h1>
-          <p className="text-gray-300">List of wires that were not detected correctly.</p>
+          <h1 className="text-2xl font-bold text-gray-50 mb-2">Results</h1>
+          <p className="text-gray-300">Results of previously tested wires.</p>
         </div>
 
         {/* Error Alert */}
@@ -164,14 +169,14 @@ export default function MismatchPage() {
                             <div className="aspect-video w-full border rounded-lg overflow-hidden">
                               <img
                                 src={image || "/placeholder.svg"}
-                                alt={`${getImageLabel(index)} of ${selectedId}`}
+                                alt={`${getImageLabel(index)} of ${selectedResultId}`}
                                 className="w-full h-full object-cover"
                               />
                             </div>
                           </div>
                         ))}
                       </div>
-                    ) : selectedId ? (
+                    ) : selectedResultId ? (
                       <div className="aspect-video w-full border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                         <div className="text-center text-gray-500">
                           {isLoadingImage ? (
@@ -197,6 +202,16 @@ export default function MismatchPage() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Result Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-bold">Result Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-gray-300">{resultDetails}</p>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Right Panel - Data Table */}
@@ -210,9 +225,9 @@ export default function MismatchPage() {
                       </div>
                     ) : (
                       <DataTable
-                        columns={columns(removeItem, { selectedId, setSelectedId })}
+                        columns={columns(removeItem, { selectedResultId, setSelectedResultId })}
                         data={data}
-                        selectionActions={{ selectedId, setSelectedId }}
+                        selectionActions={{ selectedResultId, setSelectedResultId }}
                       />
                     )}
               </div>
@@ -245,14 +260,14 @@ export default function MismatchPage() {
                             <div className="aspect-video w-full border rounded-lg overflow-hidden">
                               <img
                                 src={image || "/placeholder.svg"}
-                                alt={`${getImageLabel(index)} of ${selectedId}`}
+                                alt={`${getImageLabel(index)} of ${selectedResultId}`}
                                 className="w-full h-full object-cover"
                               />
                             </div>
                           </div>
                         ))}
                       </div>
-                    ) : selectedId ? (
+                    ) : selectedResultId ? (
                       <div className="aspect-video w-full border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                         <div className="text-center text-gray-500">
                           {isLoadingImage ? (
@@ -278,6 +293,16 @@ export default function MismatchPage() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Result Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="font-bold">Result Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-gray-300">{resultDetails}</p>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Right Panel - Data Table */}
@@ -291,9 +316,9 @@ export default function MismatchPage() {
                       </div>
                     ) : (
                       <DataTable
-                        columns={columns(removeItem, { selectedId, setSelectedId })}
+                        columns={columns(removeItem, { selectedResultId, setSelectedResultId })}
                         data={data}
-                        selectionActions={{ selectedId, setSelectedId }}
+                        selectionActions={{ selectedResultId, setSelectedResultId }}
                       />
                     )}
               </div>

@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { columns } from "./wire-table/columns";
-import { DataTable } from "./wire-table/data-table";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
 import { AlertCircle, Loader2 } from "lucide-react";
 import BackButton from "@/components/ui/BackButton";
-import { useWireType } from "./AppContexts";
-import WirePreviewPanel from "./wirePreviewPanel";
+import { useWireType } from "../AppContexts";
+import WirePreviewPanel from "./WirePreviewPanel";
 
 export default function SelectItemPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

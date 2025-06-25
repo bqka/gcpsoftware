@@ -1,15 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/index.css";
-// import WireHarnessHome from './pages/WireHarnessHome.tsx'
-import SelectItemPage from "./pages/SelectItemPage.tsx";
+import SelectItemPage from "./pages/SelectPage/index.tsx";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import AddItemPage from "./pages/AddItemPage.tsx";
 import TestItemPage from "./pages/TestItemPage.tsx";
-import ResultPage from "./pages/ResultPage.tsx";
+import ResultPage from "./pages/ResultPage/index.tsx";
 import LoginLandingPage from "./pages/LoginPage.tsx";
 import { UsernameProvider, WireTypeProvider } from "./pages/AppContexts.tsx";
-import MismatchPage from "./pages/MismatchPage.tsx";
+import MismatchPage from "./pages/MismatchPage/index.tsx";
 
 const router = createHashRouter([
   {
