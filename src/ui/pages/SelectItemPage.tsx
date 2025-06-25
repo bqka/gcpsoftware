@@ -11,6 +11,7 @@ import { columns } from "./wire-table/columns"
 import { DataTable } from "./wire-table/data-table"
 import { Plus, TestTube, ImageIcon, AlertCircle, Loader2, BarChart3 } from "lucide-react"
 import BackButton from "@/components/ui/BackButton"
+import { useWireType } from "./AppContexts"
 
 interface SingleWire {
   id: number
@@ -24,7 +25,7 @@ export default function SelectItemPage() {
   const navigate = useNavigate()
 
   const [data, setData] = useState<SingleWire[]>([])
-  const [selectedWireType, setSelectedWireType] = useState<string>("singlewire")
+  const {selectedWireType, setSelectedWireType} = useWireType();
   const [selectedWireId, setSelectedWireId] = useState<number | null>(null)
   const [selectedWireImages, setSelectedWireImages] = useState<string[]>([])
   const [isLoadingData, setIsLoadingData] = useState(false)

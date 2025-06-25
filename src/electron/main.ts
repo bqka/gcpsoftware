@@ -259,8 +259,8 @@ ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
     const exePath = app.isPackaged
       ? path.join(process.resourcesPath, "python-bin", "getsequence.exe")
       : path.join(__dirname, "../python-bin/getsequence.exe");
-
     const python = spawn(exePath);
+
 
     let output = "";
     let error = "";
@@ -270,12 +270,13 @@ ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
     });
 
     python.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
       error += data.toString();
     });
 
     python.on("close", (code) => {
       if (code === 0) {
-        const result = JSON.parse(output);
+        const result = JSON.parse(output.toString());
         resolve(result); // Return Python result
       } else {
         reject(new Error(`Python error: ${error}`));

@@ -10,14 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowRight, User, AlertCircle } from "lucide-react"
-import { useUser } from "./UserContext"
+import { useUsername } from "./AppContexts"
 
 export default function LoginLandingPage() {
   const [name, setName] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { setUsername } = useUser()
+  const { setUsername } = useUsername()
 
   const handleStart = async () => {
     if (!name.trim()) {

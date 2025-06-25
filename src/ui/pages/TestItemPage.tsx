@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, RotateCcw, Check, X } from "lucide-react";
 import CameraFeed from "@/components/ui/CameraFeed";
 import BackButton from "../../components/ui/BackButton";
-import { useUser } from "./UserContext";
+import { useUsername } from "./AppContexts";
 
 type ComparisonResult = {
   match: boolean;
@@ -29,7 +29,7 @@ export default function TestItemPage() {
   const [testImages, setTestImages] = useState<string[]>([]);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
-  const { username } = useUser();
+  const { username } = useUsername();
 
   const isDoubleWire = wireType === "doublewire";
   const requiredImages = isDoubleWire ? 2 : 1;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CameraControl from "./CameraControl";
-import { CameraOff } from "lucide-react";
+import { CameraOff, SwitchCamera } from "lucide-react";
+import { isDev } from "@/electron/util";
 
 type Camera = MediaDeviceInfo;
 type MediaStreamState = MediaStream | null;
@@ -64,18 +65,19 @@ const CameraFeed: React.FC<CameraFeedProps> = ({ videoRef }) => {
     };
   }, []);
 
-  // Enable Camera on Load
   useEffect(() => {
-    if(selectedCamera){
-      enableVideoStream();
-    }
-  }, [selectedCamera])
+    if (!selectedCamera) return;
 
-  useEffect(() => {
-    if (isCameraOn && selectedCamera) {
-      disableVideoStream();
-      enableVideoStream();
-    }
+    const initOrSwitchCamera = async () => {
+      if (isCameraOn) {
+        disableVideoStream();
+        await enableVideoStream();
+      } else {
+        await enableVideoStream();
+      }
+    };
+
+    initOrSwitchCamera();
   }, [selectedCamera]);
 
   useEffect(() => {

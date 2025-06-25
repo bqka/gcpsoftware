@@ -122,7 +122,7 @@ export default function AddItemPage() {
           match ||
           (sequence === detSequence[0] && sequence === detSequence[1])
         ) {
-          await window.electron.addItem(wireType, sequence, [
+          await window.electron.addItem(wireType, detSequence.toString(), [
             frontImage,
             backImage,
           ]);
@@ -131,7 +131,7 @@ export default function AddItemPage() {
         }
       } else {
         if (match || sequence == detSequence[0]) {
-          await window.electron.addItem(wireType, sequence, [frontImage]);
+          await window.electron.addItem(wireType, detSequence.toString(), [frontImage]);
         } else {
           alert("Color Sequence Mismatch, Adding to Mismatch List");
         }

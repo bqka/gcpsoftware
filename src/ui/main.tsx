@@ -8,7 +8,7 @@ import AddItemPage from "./pages/AddItemPage.tsx";
 import TestItemPage from "./pages/TestItemPage.tsx";
 import ResultPage from "./pages/ResultPage.tsx";
 import LoginLandingPage from "./pages/LoginPage.tsx";
-import { UserProvider } from "./pages/UserContext.tsx";
+import { UsernameProvider, WireTypeProvider } from "./pages/AppContexts.tsx";
 
 const router = createHashRouter([
   {
@@ -35,8 +35,10 @@ const router = createHashRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <UserProvider>
-      <RouterProvider router={router} />
-    </UserProvider>
+      <UsernameProvider>
+        <WireTypeProvider>
+          <RouterProvider router={router} />
+        </WireTypeProvider>
+      </UsernameProvider>
   </StrictMode>
 );
