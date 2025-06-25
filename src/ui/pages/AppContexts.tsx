@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react"
+import React, { createContext, useContext, useEffect, useState } from "react"
 
 /* ---------------- Username Context ---------------- */
 const UsernameContext = createContext<{
@@ -10,7 +10,24 @@ const UsernameContext = createContext<{
 })
 
 export const UsernameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [username, setUsername] = useState<string | null>(null)
+  const [username, setUsernameState] = useState<string | null>(null)
+
+  useEffect(() => {
+    const stored = localStorage.getItem("username");
+    if (stored) {
+      setUsernameState(stored);
+    }
+  }, []);
+
+  const setUsername = (name: string | null) => {
+    if (name) {
+      localStorage.setItem("username", name);
+    } else {
+      localStorage.removeItem("username");
+    }
+    setUsernameState(name);
+  };
+
   return (
     <UsernameContext.Provider value={{ username, setUsername }}>
       {children}

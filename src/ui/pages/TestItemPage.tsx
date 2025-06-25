@@ -125,6 +125,8 @@ export default function TestItemPage() {
       setIsTesting(true);
       const testImagesStripped = testImages.map(testImage => testImage.replace(/^data:image\/\w+;base64,/, ""));
 
+      if(wireCount.length === 0) throw new Error("Please go back and retry")
+
       const result: ComparisonResult = await window.electron.compareItem(
         wireCount,
         refImages,

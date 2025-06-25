@@ -176,14 +176,14 @@ ipcMain.handle(
   "compare-item",
   async (_event, { wireCount, originalImage, imageToBeChecked, wireType }) => {
     return new Promise((resolve, reject) => {
-      const pythonPath =
-        "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-      const python = spawn(pythonPath, ["backend/compare.py"]);
+      // const pythonPath =
+      //   "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+      // const python = spawn(pythonPath, ["backend/compare.py"]);
 
-      // const exePath = app.isPackaged
-      //   ? path.join(process.resourcesPath, "python-bin", "compare.exe")
-      //   : path.join(__dirname, "../python-bin/compare.exe");
-      // const python = spawn(exePath);
+      const exePath = app.isPackaged
+        ? path.join(process.resourcesPath, "python-bin", "compare.exe")
+        : path.join(__dirname, "../python-bin/compare.exe");
+      const python = spawn(exePath);
 
       let output = "";
       let error = "";
@@ -226,14 +226,14 @@ ipcMain.handle(
 
 ipcMain.handle("get-sequence", async (_event, { wireImages, wireType }) => {
   return new Promise((resolve, reject) => {
-    const pythonPath =
-      "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
-    const python = spawn(pythonPath, ["backend/getsequence.py"]);
+    // const pythonPath =
+    //   "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+    // const python = spawn(pythonPath, ["backend/getsequence.py"]);
 
-    // const exePath = app.isPackaged
-    //   ? path.join(process.resourcesPath, "python-bin", "getsequence.exe")
-    //   : path.join(__dirname, "../python-bin/getsequence.exe");
-    // const python = spawn(exePath);
+    const exePath = app.isPackaged
+      ? path.join(process.resourcesPath, "python-bin", "getsequence.exe")
+      : path.join(__dirname, "../python-bin/getsequence.exe");
+    const python = spawn(exePath);
 
     let output = "";
     let error = "";
@@ -288,7 +288,7 @@ ipcMain.handle(
         return filepath;
       });
 
-      const queryResult = await db("results").insert({
+      await db("results").insert({
         wire_type: wireType,
         wire_id: wireId,
         result,

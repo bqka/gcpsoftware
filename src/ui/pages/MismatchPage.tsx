@@ -20,7 +20,6 @@ export default function MismatchPage() {
   const [isLoadingData, setIsLoadingData] = useState(false)
   const [isLoadingImage, setIsLoadingImage] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [resultDetails, setResultDetails] = useState<string | null>(null)
 
   const isDoubleWire = selectedWireType === "doublewire"
 
@@ -74,7 +73,6 @@ export default function MismatchPage() {
     setSelectedWireType(value)
     setSelectedId(null) // Clear selection when switching tabs
     setSelectedWireImages([]) // Clear images when switching tabs
-    setResultDetails(null) // Clear result details when switching tabs
   }
 
   // Load initial data
@@ -92,14 +90,11 @@ export default function MismatchPage() {
     const loadData = async () => {
       if (selectedId) {
         const images = await fetchWireImages(selectedId)
-        const details = await window.electron.fetchResultDetails(selectedId)
         if (images) {
           setSelectedWireImages(images)
         }
-        if (details) setResultDetails(details)
       } else {
         setSelectedWireImages([])
-        setResultDetails(null)
       }
     }
 
@@ -202,16 +197,6 @@ export default function MismatchPage() {
                     )}
                   </CardContent>
                 </Card>
-
-                {/* Result Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-bold">Result Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-gray-300">{resultDetails}</p>
-                  </CardContent>
-                </Card>
               </div>
 
               {/* Right Panel - Data Table */}
@@ -291,16 +276,6 @@ export default function MismatchPage() {
                         </div>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-
-                {/* Result Details */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="font-bold">Result Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-gray-300">{resultDetails}</p>
                   </CardContent>
                 </Card>
               </div>

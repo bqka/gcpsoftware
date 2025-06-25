@@ -235,7 +235,7 @@ export default function AddItemPage() {
     }
   }, [currentStep]);
 
-  const canSave = sequence.trim() && frontImage && (!isDoubleWire || backImage);
+  const canSave = sequence.trim() && frontImage && (!isDoubleWire || backImage) && detSequence.length > 0 && !isDetecting;
 
   return (
     <div className="min-h-screen bg-blac p-6">
@@ -371,7 +371,7 @@ export default function AddItemPage() {
                 <div className="flex flex-row gap-4 items-center">
                   <Button
                     onClick={handleSave}
-                    disabled={(!canSave || isSaving ) && (detSequence.length > 0)}
+                    disabled={(!canSave || isSaving )}
                     className="flex items-center gap-2"
                     size="lg"
                   >
