@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import CameraControl from "./CameraControl";
-import { CameraOff, SwitchCamera } from "lucide-react";
-import { isDev } from "@/electron/util";
+import { CameraOff } from "lucide-react";
 
 type Camera = MediaDeviceInfo;
 type MediaStreamState = MediaStream | null;
