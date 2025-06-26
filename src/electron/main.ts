@@ -144,12 +144,8 @@ ipcMain.handle("remove-item", async (_, { table, id }) => {
 
     const imagePaths: string[] = [];
 
-    if (table === "singlewire" && record.path) {
-      imagePaths.push(record.path);
-    } else if (table === "doublewire") {
-      if (record.image_front) imagePaths.push(record.image_front);
-      if (record.image_back) imagePaths.push(record.image_back);
-    }
+    if (record.image_front) imagePaths.push(record.image_front);
+    if (record.image_back) imagePaths.push(record.image_back);
 
     for (const filePath of imagePaths) {
       try {
