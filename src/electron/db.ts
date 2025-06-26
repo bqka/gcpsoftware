@@ -20,6 +20,7 @@ export async function initializeDatabase() {
   if (!hasWires) {
     await db.schema.createTable("wires", (table) => {
       table.increments("id").primary();
+      table.text("wire_name").notNullable();
       table.text("wire_type").notNullable();
       table.text("sequence").notNullable();
       table.text("image_front").notNullable();
@@ -34,6 +35,7 @@ export async function initializeDatabase() {
       table.increments("id").primary();
       table.text("wire_type").notNullable();
       table.integer("wire_id").notNullable();
+      table.text("wire_name").notNullable();
       table.boolean("result").notNullable();
       table.text("details").notNullable();
       table.timestamp("compared_at").defaultTo(db.fn.now());
@@ -48,6 +50,7 @@ export async function initializeDatabase() {
     await db.schema.createTable("mismatch", (table) => {
       table.increments("id").primary();
       table.timestamp("date").defaultTo(db.fn.now());
+      table.text("wire_name").notNullable;
       table.text("wire_type").notNullable();
       table.text("sequence").notNullable();
       table.text("image_front").notNullable();

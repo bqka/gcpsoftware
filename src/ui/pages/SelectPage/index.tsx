@@ -95,7 +95,9 @@ export default function SelectItemPage() {
 
     navigate(`/test-item/${selectedWireType}/${selectedWireId}`, {
       state: {
-        wireCount: wireCount
+        wireCount: wireCount,
+        wireSequence: currRow.sequence,
+        wireName: currRow.wire_name
       }
     });
   };

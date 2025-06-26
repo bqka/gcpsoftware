@@ -179,14 +179,16 @@ def main():
         data = json.loads(raw_input)
         
         wire_count = data["wire_count"]
-        ref_images = base64_to_cv2_image(data["original"])
+        sequence = data["sequence"]
+        stringified_rgb_list = json.loads(sequence)
+        sequence = [json.loads(rgb) for rgb in stringified_rgb_list]
         test_images = base64_to_cv2_image(data["input"])
         wire_type = data["wireType"]
 
         if wire_type == "singlewire":
-            result = compare_single([wire_count[0], ref_images[0]], test_images[0])
+            result = compare_single([wire_count[0], sequence[0]], test_images[0])
         elif wire_type == "doublewire":
-            result = compare_double([[wire_count[0], ref_images[0]], [wire_count[1], ref_images[1]]], test_images)
+            result = compare_double([[wire_count[0], sequence[0]], [wire_count[1], sequence[1]]], test_images)
         else:
             raise ValueError("Invalid wire type")
 

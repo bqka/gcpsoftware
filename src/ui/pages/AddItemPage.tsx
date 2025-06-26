@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Camera, RotateCcw, Save, Check, AlertCircle } from "lucide-react";
 import CameraFeed from "@/components/ui/CameraFeed";
-import BackButton from "../../components/ui/BackButton";
+import BackButton from "@/components/ui/BackButton";
 
 export default function AddItemPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -18,7 +18,7 @@ export default function AddItemPage() {
   // const { wireType } = useParams<{ wireType: string }>();
   const wireType = useParams<{ wireType?: string }>().wireType ?? "singlewire";
 
-  const [sequence, setSequence] = useState("");
+  const [wireName, setWireName] = useState("");
   const [frontImage, setFrontImage] = useState<string | null>(null);
   const [backImage, setBackImage] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
@@ -98,7 +98,7 @@ export default function AddItemPage() {
   };
 
   const handleSave = async () => {
-    if (!sequence.trim()) {
+    if (!wireName.trim()) {
       setError("Please enter an item name");
       return;
     }
@@ -117,17 +117,17 @@ export default function AddItemPage() {
           setError("Could not process back image");
           return;
         }
-          await window.electron.addWire(wireType, JSON.stringify(detSequence), [
+          await window.electron.addWire(wireType, wireName, JSON.stringify(detSequence), [
             frontImage,
             backImage,
           ]);
       } else {
-          await window.electron.addWire(wireType, JSON.stringify(detSequence), [
+          await window.electron.addWire(wireType, wireName, JSON.stringify(detSequence), [
             frontImage,
           ]);
       }
 
-      setSequence("");
+      setWireName("");
       setDetSequence([]);
       setFrontImage(null);
       setBackImage(null);
@@ -141,6 +141,7 @@ export default function AddItemPage() {
   };
 
   const handleInvalid = async () => {
+    setIsSaving(true);
     try {
       if (!frontImage) {
         setError("Could not process back image");
@@ -151,17 +152,17 @@ export default function AddItemPage() {
           setError("Could not process back image");
           return;
         }
-        await window.electron.addMismatch(wireType, detSequence.toString(), [
+        await window.electron.addMismatch(wireType, wireName, detSequence.toString(), [
           frontImage,
           backImage,
         ]);
       } else {
-          await window.electron.addMismatch(wireType, detSequence.toString(), [
+          await window.electron.addMismatch(wireType, wireName, detSequence.toString(), [
             frontImage,
           ]);
       }
 
-      setSequence("");
+      setWireName("");
       setFrontImage(null);
       setDetSequence([]);
       setBackImage(null);
@@ -169,6 +170,8 @@ export default function AddItemPage() {
     } catch (err) {
       setError("Failed to add item to mismatch list. Please try again.");
       console.error("Save error:", err);
+    } finally{
+      setIsSaving(false);
     }
   };
 
@@ -234,7 +237,7 @@ export default function AddItemPage() {
     }
   }, [currentStep]);
 
-  const canSave = sequence.trim() && frontImage && (!isDoubleWire || backImage) && detSequence.length > 0 && !isDetecting;
+  const canSave = wireName.trim() && frontImage && (!isDoubleWire || backImage) && detSequence.length > 0 && !isDetecting;
 
   return (
     <div className="min-h-screen bg-blac p-6">
@@ -357,8 +360,8 @@ export default function AddItemPage() {
                   <Label htmlFor="sequence">Item Name *</Label>
                   <Input
                     id="sequence"
-                    value={sequence}
-                    onChange={(e) => setSequence(e.target.value)}
+                    value={wireName}
+                    onChange={(e) => setWireName(e.target.value)}
                     placeholder="Enter item name or sequence"
                     className="mt-1"
                   />
@@ -372,16 +375,16 @@ export default function AddItemPage() {
                     size="lg"
                   >
                     <Save className="h-4 w-4" />
-                    {isSaving ? "Saving..." : "Save Item"}
+                    {isSaving ? "Saving..." : "Validate"}
                   </Button>
 
                   <Button
                     size="lg"
                     variant="destructive"
-                    disabled={detSequence.length === 0}
+                    disabled={!canSave || isSaving}
                     onClick={handleInvalid}
                   >
-                    Invalid
+                    Invalidate
                   </Button>
                 </div>
               </CardContent>
@@ -519,8 +522,8 @@ export default function AddItemPage() {
                 )}
                 <div className="flex items-center justify-between text-sm">
                   <span>Item Name</span>
-                  <Badge variant={sequence.trim() ? "default" : "secondary"}>
-                    {sequence.trim() ? "Added" : "Pending"}
+                  <Badge variant={wireName.trim() ? "default" : "secondary"}>
+                    {wireName.trim() ? "Added" : "Pending"}
                   </Badge>
                 </div>
               </CardContent>

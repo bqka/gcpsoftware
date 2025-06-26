@@ -33,7 +33,11 @@ export default function TestItemPage() {
 
   const { username } = useUsername();
   const location = useLocation();
-  const wireCount = (location.state as { wireCount?: number[] })?.wireCount ?? [];
+  const { wireCount, wireSequence, wireName } = location.state as {
+  wireCount: number[];
+  wireSequence: string;
+  wireName: string;
+};
 
   const isDoubleWire = wireType === "doublewire";
   const requiredImages = isDoubleWire ? 2 : 1;
@@ -129,7 +133,7 @@ export default function TestItemPage() {
 
       const result: ComparisonResult = await window.electron.compareItem(
         wireCount,
-        refImages,
+        wireSequence,
         testImagesStripped,
         wireTypeSafe
       );
@@ -141,7 +145,7 @@ export default function TestItemPage() {
       }
 
       if(!username) throw new Error("No Username provided")
-      await window.electron.addResult(wireTypeSafe, selectedWireId, result.match, result.details, username, testImages);
+      await window.electron.addResult(wireTypeSafe, selectedWireId, wireName, result.match, result.details, username, testImages);
 
     } catch (error) {
       console.error("Error comparing:", error);

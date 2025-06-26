@@ -41,8 +41,8 @@ export const columns = (
       },
     },
     {
-      accessorKey: "id",
-      header: "Wire Id",
+      accessorKey: "wire_name",
+      header: "Name",
     },
     {
       accessorKey: "sequence",

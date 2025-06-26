@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 
 async function addItem(
   wireType: string,
+  wireName: string,
   sequence: string,
   base64Images: string[]
 ) {
@@ -21,7 +22,7 @@ async function addItem(
   }
 
   if (wireType === "singlewire" && base64Images.length !== 1) {
-    throw new Error("Single wire must have exactly one image.");
+    throw new Error(`Single wire must have exactly one image. It has ${base64Images.length}`);
   }
 
   if (wireType === "doublewire" && base64Images.length !== 2) {
@@ -39,6 +40,7 @@ async function addItem(
   let result;
   result = await db("wires").insert({
     wire_type: wireType,
+    wire_name: wireName,
     image_front: imagePaths[0],
     image_back: imagePaths[1] ?? null,
     sequence: sequence,
@@ -122,9 +124,9 @@ ipcMain.handle(
 //add-wire
 ipcMain.handle(
   "add-wire",
-  async (_event, { wireType, sequence, base64Images }) => {
+  async (_event, { wireType, wireName, sequence, base64Images }) => {
     try {
-      await addItem(wireType, sequence, base64Images);
+      await addItem(wireType, wireName, sequence, base64Images);
       console.log(`Inserted new item`);
     } catch (error) {
       console.error("Error inserting item:", error);
@@ -174,7 +176,7 @@ ipcMain.handle("remove-item", async (_, { table, id }) => {
 //compare item
 ipcMain.handle(
   "compare-item",
-  async (_event, { wireCount, originalImage, imageToBeChecked, wireType }) => {
+  async (_event, { wireCount, originalSequence, imageToBeChecked, wireType }) => {
     return new Promise((resolve, reject) => {
       // const pythonPath =
       //   "C:\\Users\\Acer\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
@@ -211,12 +213,10 @@ ipcMain.handle(
       // Send data to Python via stdin
       const payload = JSON.stringify({
         wire_count: wireCount,
-        original: originalImage,
+        sequence: originalSequence,
         input: imageToBeChecked,
         wireType: wireType,
       });
-
-      console.log(originalImage.length, imageToBeChecked.length)
 
       python.stdin.write(payload);
       python.stdin.end();
@@ -271,7 +271,7 @@ ipcMain.handle(
   "add-result",
   async (
     _event,
-    { wireType, wireId, result, details, tested_by, base64images }
+    { wireType, wireId, wireName, result, details, tested_by, base64images }
   ) => {
     try {
       console.log("ADDING RESULT");
@@ -291,6 +291,7 @@ ipcMain.handle(
       await db("results").insert({
         wire_type: wireType,
         wire_id: wireId,
+        wire_name: wireName,
         result,
         details,
         tested_by,
@@ -307,7 +308,7 @@ ipcMain.handle(
 //add mismatch
 ipcMain.handle(
   "add-mismatch",
-  async (_event, { wireType, sequence, base64images }) => {
+  async (_event, { wireType, wireName, sequence, base64images }) => {
     try {
       const imageDir = path.join(app.getPath("userData"), "mismatch", wireType);
       if (!fs.existsSync(imageDir)) {
@@ -324,6 +325,7 @@ ipcMain.handle(
 
       const queryResult = await db("mismatch").insert({
         wire_type: wireType,
+        wire_name: wireName,
         sequence: sequence,
         image_front: imagePaths[0],
         image_back: imagePaths[1],
