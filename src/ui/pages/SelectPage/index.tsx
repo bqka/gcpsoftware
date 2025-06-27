@@ -30,7 +30,10 @@ export default function SelectItemPage() {
     setIsLoadingData(true);
     setError(null);
     try {
-      const result = await window.electron.fetchData<Wire>("wires", selectedWireType);
+      const result = await window.electron.fetchData<Wire>(
+        "wires",
+        selectedWireType
+      );
       setData(result);
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -41,13 +44,13 @@ export default function SelectItemPage() {
   };
 
   const fetchCurrRow = async (id: number) => {
-    try{
+    try {
       const result = await window.electron.fetchRow<Wire>("wires", id);
       setCurrRow(result);
-    } catch(err){
+    } catch (err) {
       console.log("Error fetching row:", err);
     }
-  }
+  };
 
   const removeItem = async (id: number) => {
     try {
@@ -68,7 +71,11 @@ export default function SelectItemPage() {
   const fetchWireImage = async (id: number) => {
     setIsLoadingImage(true);
     try {
-      const result = await window.electron.fetchImages("wires", selectedWireType, id);
+      const result = await window.electron.fetchImages(
+        "wires",
+        selectedWireType,
+        id
+      );
       if (result) return result;
     } catch (error) {
       console.error("Error fetching wire image:", error);
@@ -83,12 +90,14 @@ export default function SelectItemPage() {
       setError("Please select an item to test.");
       return;
     }
-    if(!currRow) return;
-    const rgbArray = JSON.parse(currRow.sequence).map((arr: string) => JSON.parse(arr));
-    let wireCount = []
-    if(selectedWireType === "singlewire"){
+    if (!currRow) return;
+    const rgbArray = JSON.parse(currRow.sequence).map((arr: string) =>
+      JSON.parse(arr)
+    );
+    let wireCount = [];
+    if (selectedWireType === "singlewire") {
       wireCount.push(rgbArray[0].length);
-    } else{
+    } else {
       wireCount.push(rgbArray[0].length);
       wireCount.push(rgbArray[1].length);
     }
@@ -97,8 +106,8 @@ export default function SelectItemPage() {
       state: {
         wireCount: wireCount,
         wireSequence: currRow.sequence,
-        wireName: currRow.wire_name
-      }
+        wireName: currRow.wire_name,
+      },
     });
   };
 
@@ -141,7 +150,7 @@ export default function SelectItemPage() {
   }, [selectedWireId, selectedWireType]);
 
   return (
-    <div className="min-h-screen bg-blac p-6">
+    <div className="min-h-screen bg-black p-6 space-y-2">
       <BackButton />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
@@ -179,9 +188,9 @@ export default function SelectItemPage() {
           </div>
 
           <TabsContent value="singlewire" className="mt-0">
-            <div className="grid lg:grid-cols-5 gap-6">
+            <div className="flex flex-col lg:flex-row gap-4">
               {/* Left Panel - Controls and Image Preview */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="w-full lg:w-2/5">
                 <WirePreviewPanel
                   selectedWireId={selectedWireId}
                   selectedWireImages={selectedWireImages}
@@ -191,8 +200,9 @@ export default function SelectItemPage() {
                   onTestClick={handleTestClick}
                 />
               </div>
+
               {/* Right Panel - Data Table */}
-              <div className="lg:col-span-3">
+              <div className="w-full lg:w-3/5">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -231,9 +241,9 @@ export default function SelectItemPage() {
           </TabsContent>
 
           <TabsContent value="doublewire" className="mt-0">
-            <div className="grid lg:grid-cols-5 gap-6">
+            <div className="flex flex-col lg:flex-row gap-4">
               {/* Left Panel - Controls and Image Preview */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="w-full lg:w-2/5">
                 {/* Image Preview */}
                 <WirePreviewPanel
                   selectedWireId={selectedWireId}
@@ -246,7 +256,7 @@ export default function SelectItemPage() {
               </div>
 
               {/* Right Panel - Data Table */}
-              <div className="lg:col-span-3">
+              <div className="w-full lg:w-3/5">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">

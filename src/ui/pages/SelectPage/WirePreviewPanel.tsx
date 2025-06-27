@@ -30,7 +30,7 @@ export default function WirePreviewPanel({
   };
 
   return (
-    <div className="space-y-6 min-w-[500px]">
+    <div className="space-y-6">
       {/* Reference Images */}
       <Card>
         <CardHeader>
